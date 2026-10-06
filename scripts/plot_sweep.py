@@ -28,13 +28,14 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--sweep", default="results/sweep/granite-4.0-350m")
     ap.add_argument("--baseline-torch", default="results/runs/granite-4.0-350m")
-    ap.add_argument("--baseline-f16", default="results/serve/harness_base-f16")
+    ap.add_argument("--baseline-f16", default="results/serve/harness_base-bf16",
+                    help="served un-tuned baseline (bf16 to match the adapters; falls back to the f16 run)")
     ap.add_argument("--baseline-q4", default="results/serve/harness_base-q4_k_m")
     ap.add_argument("--out", default=str(FIGURES_DIR / "lora_rank_sweep.png"))
     args = ap.parse_args()
 
     base_torch = run_summary(Path(args.baseline_torch))
-    base_f16 = run_summary(Path(args.baseline_f16))
+    base_f16 = run_summary(Path(args.baseline_f16)) or run_summary(RESULTS_DIR / "serve" / "harness_base-f16")
     base_q4 = run_summary(Path(args.baseline_q4))
 
     rows = []
@@ -42,7 +43,11 @@ def main() -> None:
         res = json.loads(tr.read_text(encoding="utf-8"))["result"]
         run_dir = tr.parent
         rank, lr, seed = int(res["rank"]), float(res["lr"]), int(res["seed"])
-        s_f16 = run_summary(RESULTS_DIR / "serve" / f"harness_lora-r{rank}-f16") if seed == 0 else None
+        # adapters are served from bf16 (fine-tuned weights overflow float16); fall back to f16 if that is what exists
+        s_f16 = None
+        if seed == 0:
+            s_f16 = run_summary(RESULTS_DIR / "serve" / f"harness_lora-r{rank}-bf16") or \
+                    run_summary(RESULTS_DIR / "serve" / f"harness_lora-r{rank}-f16")
         s_q4 = run_summary(RESULTS_DIR / "serve" / f"harness_lora-r{rank}-q4_k_m") if seed == 0 else None
         s_torch = run_summary(run_dir / "eval")
         s = s_f16 or s_torch
@@ -51,7 +56,7 @@ def main() -> None:
             "trainable_pct": round(float(res["trainable_pct"]), 3),
             "eval_loss_before": float(res["eval_loss_before"]), "eval_loss_after": float(res["eval_loss_after"]),
             "final_train_loss": res.get("final_train_loss"), "train_time_s": float(res["train_time_s"]),
-            "eval_backend": "llama.cpp f16" if s_f16 else ("torch fp32" if s_torch else None),
+            "eval_backend": "llama.cpp bf16" if s_f16 else ("torch fp32" if s_torch else None),
             "accuracy": s["accuracy"] if s else None,
             "accuracy_ood": s["accuracy_ood"] if s else None,
             "doc_single": s["accuracy_by_category"].get("doc_single") if s else None,
@@ -74,11 +79,11 @@ def main() -> None:
     fig, axes = plt.subplots(1, 2, figsize=(11, 4.3))
     ax = axes[0]
     if not ev.empty:
-        ax.plot(ev["rank"], ev["accuracy"], marker="o", label="LoRA adapter, f16 (llama.cpp)" if ev["eval_backend"].iloc[0].startswith("llama") else "LoRA adapter (torch)")
+        ax.plot(ev["rank"], ev["accuracy"], marker="o", label="LoRA adapter, bf16 (llama.cpp)" if ev["eval_backend"].iloc[0].startswith("llama") else "LoRA adapter (torch)")
         if ev["accuracy_int4"].notna().any():
             ax.plot(ev["rank"], ev["accuracy_int4"], marker="s", ls="--", label="LoRA adapter, int4 (Q4_K_M)")
     if base_f16:
-        ax.axhline(base_f16["accuracy"], ls="--", color="gray", label=f"no fine-tuning, f16 ({base_f16['accuracy']:.0%})")
+        ax.axhline(base_f16["accuracy"], ls="--", color="gray", label=f"no fine-tuning, served ({base_f16['accuracy']:.0%})")
     if base_q4:
         ax.axhline(base_q4["accuracy"], ls=":", color="gray", label=f"no fine-tuning, int4 ({base_q4['accuracy']:.0%})")
     ax.set_xscale("log", base=2)
@@ -113,7 +118,7 @@ def main() -> None:
     def pct(x):
         return "-" if x is None or pd.isna(x) else f"{x:.1%}"
 
-    print("| rank | seed | trainable % | eval loss before -> after | accuracy (f16) | ood | doc_single | multi_step | planning failures | accuracy (int4) | malformed (int4) |")
+    print("| rank | seed | trainable % | eval loss before -> after | accuracy (served, bf16) | ood | doc_single | multi_step | planning failures | accuracy (int4) | malformed (int4) |")
     print("|---|---|---|---|---|---|---|---|---|---|---|")
     if base_f16:
         print(f"| none (baseline) | - | 0 | - | {pct(base_f16['accuracy'])} | {pct(base_f16['accuracy_ood'])} | "
