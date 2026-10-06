@@ -25,8 +25,8 @@ distillation on a T4, vLLM on Kubernetes) are written and documented but not exe
 | stage | state |
 |---|---|
 | 1. harness, task set, taxonomy, baselines | **done** — 24 unit tests, 300-task test split + 300-task train split, baseline runs for Granite 4.0 350M and Qwen2.5 0.5B logged in `results/runs/` |
-| 2. LoRA rank sweep (CPU) | **running** — ranks 1 and 4 trained and evaluated on the 150-task subset (38.7 % and 48.0 % vs 59.3 % untuned: planning failures fall, `no_final_answer` appears), r=16 and r=64 in progress; results land in `results/sweep/` and `results/serve/` as they finish. Teacher-filtered distillation on GPU = `notebooks/02_lora_sweep_kaggle.ipynb` |
-| 3. LoRA paper reproduction | **first numbers in** (r=1 vs r=4 subspace overlap, with random baseline); r=4 vs r=64 and seed-vs-seed pending the sweep → [REPRODUCTION.md](REPRODUCTION.md) |
+| 2. LoRA rank sweep (CPU) | **ranks 1, 4, 16 trained and evaluated** on the 150-task subset (38.7 / 48.0 / 54.0 % vs 59.3 % untuned — accuracy rises with rank, failures move from planning to finishing/synthesis); r=64 trained, evaluation running. Teacher-filtered distillation on GPU = `notebooks/02_lora_sweep_kaggle.ipynb` |
+| 3. LoRA paper reproduction | **done for r = 1/4/16** — subspace overlap between adapters of different rank sits at the random-matrix baseline (claim does not reproduce at this scale); r=64 and seed-vs-seed pending → [REPRODUCTION.md](REPRODUCTION.md) |
 | 4. serving / quantisation | **run on CPU** — Granite-4.0-350M converted to GGUF, served with llama.cpp at f16 / int8 / int4, the 150-task harness run through the server for each (`results/serve/`); vLLM + Kubernetes path written for GPU, not executed → [serve/README.md](serve/README.md) |
 
 ## Headline results (stage 1, CPU laptop, greedy decoding, 150-task stratified subset)
@@ -232,8 +232,9 @@ python scripts/inspect_run.py results/runs/granite-4.0-350m --label wrong_answer
 |---|---|---|---|---|---|
 | none (untuned, served f16) | 0 | – | 59.3 % | 35.5 % | wrong_tool 24, incomplete_chain 16 |
 | 1 | 0.053 | 3.03 → 0.14 | **38.7 %** | 32.3 % | no_final_answer 42, semantically_wrong_call 21 |
-| 4 | 0.211 | 3.03 → 0.06 | **48.0 %** | 35.5 % | no_final_answer 26, semantically_wrong_call 18 |
-| 16, 64 | | *training — rows are appended by `scripts/plot_sweep.py` when the runs finish* | | | |
+| 4 | 0.211 | 3.03 → 0.06 | 48.0 % | 35.5 % | no_final_answer 26, semantically_wrong_call 18 |
+| 16 | 0.839 | 3.03 → 0.05 | **54.0 %** | 29.0 % | semantically_wrong_call 17, wrong_answer_after_correct_tools 13 |
+| 64 | 3.3 | *trained; evaluation running — `scripts/plot_sweep.py` adds the row* | | | |
 
 ![rank sweep](docs/figures/lora_rank_sweep.png)
 
@@ -252,6 +253,17 @@ python scripts/inspect_run.py results/runs/granite-4.0-350m --label wrong_answer
   (11/30 — the adapter over-triggers on numbers), multi-step chains (2/25) and the no-tool questions (1/10: it
   now calls tools for everything). Fine-tuning on oracle trajectories moved the failures from *planning* to
   *finishing* — exactly the kind of shift a single accuracy number hides and the taxonomy shows.
+* **r=16 (54.0 %) closes most of the gap and changes the failure mix again**: `no_final_answer` disappears from
+  the top labels, multi-step chains jump from 2/25 to **9/25** (the untuned model: 2/25), calc/SQL stay intact
+  (26/30, 25/30), but document routing regresses (3/20 after r=4's 8/20), unit conversion is still hurt (18/30)
+  and the model now calls tools on every no-tool question (0/10). Accuracy rises monotonically with rank
+  (38.7 → 48.0 → 54.0 %) — the opposite of the paper's flat curve — so on this task, with 290 examples, the
+  useful update is *not* low-rank; r=64 is the remaining data point.
+* **int4 after fine-tuning (r=16): 50.7 % with a 1 % malformed-call rate** (int8: 50.0 %), versus 20.7 % / 59 %
+  for the untuned model at int4. Fine-tuning on the exact call format makes the format survive 4-bit
+  weights — tool-calling robustness to quantisation is trainable. (The r=1 adapter's int8/int4 runs are
+  degenerate under llama.cpp although fake-quantised PyTorch inference is fine; treated as a runtime
+  interaction, not a result.)
 * Caveat on comparability: adapters are served from bf16 and the untuned baseline from f16 (both via llama.cpp);
   the untuned model's f16 and fp32 runs agree within two tasks, so the comparison stands, and a bf16 baseline
   run is queued for a like-for-like line.

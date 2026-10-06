@@ -65,25 +65,32 @@ served from bf16 through llama.cpp, 150-task subset).** Rows for r=16 and r=64 a
 | baseline (no LoRA) | 0 | — | 59.3 % | 35.5 % | 47 |
 | 1 | 0.053 | 3.03 → 0.14 | 38.7 % | 32.3 % | 18 |
 | 4 | 0.211 | 3.03 → 0.06 | 48.0 % | 35.5 % | 18 |
-| 16 | 0.84 | *pending* | | | |
-| 64 | 3.3 | *pending* | | | |
+| 16 | 0.839 | 3.03 → 0.05 | 54.0 % | 29.0 % | 18 |
+| 64 | 3.3 | trained | *evaluation running* | | |
 
-Reading so far: neither r=1 nor r=4 reaches the untuned model (38.7 % and 48.0 % vs 59.3 %) despite converged
-SFT losses; accuracy rises with rank, and r=4 already learns the document routing (0/20 → 8/20) while a new
-`no_final_answer` failure dominates. The paper's "r=1 already matches r=64" does not hold here; whether any
-rank beats the untuned model, and where the curve flattens, is decided by the r=16/64 runs.
+Reading: accuracy rises monotonically with rank (38.7 → 48.0 → 54.0 %) and none of r = 1/4/16 reaches the
+untuned model (59.3 %) despite converged SFT losses; the failure mix shifts from planning (`wrong_tool` 24 → 5)
+to finishing and synthesis (`no_final_answer` at r = 1/4, `semantically_wrong_call` /
+`wrong_answer_after_correct_tools` at r = 16). **Claim 1 (very low rank suffices) does not hold on this task at
+this scale**: r = 1 is far from r = 16, and the curve has not flattened by r = 16.
 
 | comparison (q_proj, averaged over 28 layers) | φ top-1 | random-matrix baseline top-1 (d = 1024) |
 |---|---|---|
 | r=1 vs r=4 | 0.0027 | 0.0009 |
-| r=4 vs r=64 | *pending* | |
-| r=64 seed 0 vs seed 1 | *pending* | |
+| r=1 vs r=16 | 0.0022 | 0.0018 |
+| r=4 vs r=16 | 0.0015 | 0.0010 |
+| r=4 vs r=64, r=16 vs r=64 | *computed when the r=64 run finishes* | |
+| r=64 seed 0 vs seed 1 | *not run (CPU budget)* | |
 
-Reading: the top direction learned at r=1 is about 3× more aligned with the r=4 subspace than a random
-direction would be — detectably shared, but nowhere near the paper's φ > 0.5 for GPT-3. At d = 1024 with 290
-training examples, "the useful update lives in one direction" is not what we observe; the r=4 adapter's
-performance jump is consistent with that. Treat as preliminary until the r=4/r=64 and seed comparisons are in
-(`docs/figures/subspace_r1_vs_r4_q.png` and `_random_baseline.png` hold the heat-maps).
+Reading: **claim 2 (adapters of different rank share their top directions) does not reproduce here.** The
+overlap between the top directions of any two adapters is at — or within 3× of — the random-matrix baseline
+(φ ≈ 0.001–0.003 vs the paper's > 0.5 for GPT-3's W_q at r = 8/64). Possible reasons, in order of likelihood:
+290 training examples and 2 epochs leave the A matrices close to their random initialisation except along a
+few directions (A is initialised Gaussian; B starts at zero), so the *learned* signal is a small part of A;
+d = 1024 vs 12 288; and a structured-output task whose useful update is evidently not low-rank (claim 1). A
+cleaner test would compare B·A products rather than A alone, or train to convergence on more data — both are
+one-line changes in `slm_agent_lab/train/subspace.py` and `scripts/lora_sweep.py`. Heat-maps:
+`docs/figures/subspace_r*_vs_r*_q.png` with `_random_baseline.png` companions.
 
 ## Where we expect numbers to differ, and how to read them
 
