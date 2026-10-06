@@ -1,0 +1,63 @@
+{
+  "modules": [
+    "model.layers.0.self_attn.q_proj",
+    "model.layers.1.self_attn.q_proj",
+    "model.layers.10.self_attn.q_proj",
+    "model.layers.11.self_attn.q_proj",
+    "model.layers.12.self_attn.q_proj",
+    "model.layers.13.self_attn.q_proj",
+    "model.layers.14.self_attn.q_proj",
+    "model.layers.15.self_attn.q_proj",
+    "model.layers.16.self_attn.q_proj",
+    "model.layers.17.self_attn.q_proj",
+    "model.layers.18.self_attn.q_proj",
+    "model.layers.19.self_attn.q_proj",
+    "model.layers.2.self_attn.q_proj",
+    "model.layers.20.self_attn.q_proj",
+    "model.layers.21.self_attn.q_proj",
+    "model.layers.22.self_attn.q_proj",
+    "model.layers.23.self_attn.q_proj",
+    "model.layers.24.self_attn.q_proj",
+    "model.layers.25.self_attn.q_proj",
+    "model.layers.26.self_attn.q_proj",
+    "model.layers.27.self_attn.q_proj",
+    "model.layers.3.self_attn.q_proj",
+    "model.layers.4.self_attn.q_proj",
+    "model.layers.5.self_attn.q_proj",
+    "model.layers.6.self_attn.q_proj",
+    "model.layers.7.self_attn.q_proj",
+    "model.layers.8.self_attn.q_proj",
+    "model.layers.9.self_attn.q_proj"
+  ],
+  "rank_a": 1,
+  "rank_b": 16,
+  "mean_grid": [
+    [
+      0.0021612399837093016,
+      0.002997394090146242,
+      0.004160307424951627,
+      0.0048792491013175876,
+      0.006300116228106033,
+      0.007439215886863947,
+      0.008374811979592778,
+      0.009244237654326883,
+      0.010221919443990504,
+      0.011094666626637004,
+      0.012265289593155362,
+      0.013420013403187372,
+      0.01419223751872778,
+      0.014973479589181287,
+      0.016151500383525023,
+      0.01686258158380432
+    ]
+  ],
+  "top1_overlap": 0.0021612399837093016,
+  "topk_overlap_diag": [
+    0.0021612399837093016
+  ],
+  "full_overlap": 0.01686258158380432,
+  "random_baseline_top1": 0.0018174512669477476,
+  "random_baseline_diag": [
+    0.0018174512669477476
+  ]
+}
