@@ -64,14 +64,14 @@ served from bf16 through llama.cpp, 150-task subset).** Rows for r=16 and r=64 a
 |---|---|---|---|---|---|
 | baseline (no LoRA) | 0 | — | 59.3 % | 35.5 % | 47 |
 | 1 | 0.053 | 3.03 → 0.14 | 38.7 % | 32.3 % | 18 |
-| 4 | 0.211 | 3.03 → 0.06 | *evaluation being completed* | | |
+| 4 | 0.211 | 3.03 → 0.06 | 48.0 % | 35.5 % | 18 |
 | 16 | 0.84 | *pending* | | | |
 | 64 | 3.3 | *pending* | | | |
 
-Reading so far: r=1 is **not** sufficient on this task — it under-performs the untuned model (38.7 % vs
-59.3 %) despite a converged SFT loss, mainly through a new `no_final_answer` failure. The paper's "r=1 already
-matches r=64" does not hold here; whether any rank beats the untuned model, and where the curve flattens, is
-decided by the r=4/16/64 runs.
+Reading so far: neither r=1 nor r=4 reaches the untuned model (38.7 % and 48.0 % vs 59.3 %) despite converged
+SFT losses; accuracy rises with rank, and r=4 already learns the document routing (0/20 → 8/20) while a new
+`no_final_answer` failure dominates. The paper's "r=1 already matches r=64" does not hold here; whether any
+rank beats the untuned model, and where the curve flattens, is decided by the r=16/64 runs.
 
 | comparison (q_proj, averaged over 28 layers) | φ top-1 | random-matrix baseline top-1 (d = 1024) |
 |---|---|---|

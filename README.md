@@ -25,7 +25,7 @@ distillation on a T4, vLLM on Kubernetes) are written and documented but not exe
 | stage | state |
 |---|---|
 | 1. harness, task set, taxonomy, baselines | **done** — 24 unit tests, 300-task test split + 300-task train split, baseline runs for Granite 4.0 350M and Qwen2.5 0.5B logged in `results/runs/` |
-| 2. LoRA rank sweep (CPU) | **running** — ranks 1 and 4 trained; r=1 evaluated on the 150-task subset (38.7 % vs 59.3 % untuned: worse), r=4's evaluation is being completed, r=16 and r=64 training; results land in `results/sweep/` and `results/serve/` as they finish. Teacher-filtered distillation on GPU = `notebooks/02_lora_sweep_kaggle.ipynb` |
+| 2. LoRA rank sweep (CPU) | **running** — ranks 1 and 4 trained and evaluated on the 150-task subset (38.7 % and 48.0 % vs 59.3 % untuned: planning failures fall, `no_final_answer` appears), r=16 and r=64 in progress; results land in `results/sweep/` and `results/serve/` as they finish. Teacher-filtered distillation on GPU = `notebooks/02_lora_sweep_kaggle.ipynb` |
 | 3. LoRA paper reproduction | **first numbers in** (r=1 vs r=4 subspace overlap, with random baseline); r=4 vs r=64 and seed-vs-seed pending the sweep → [REPRODUCTION.md](REPRODUCTION.md) |
 | 4. serving / quantisation | **run on CPU** — Granite-4.0-350M converted to GGUF, served with llama.cpp at f16 / int8 / int4, the 150-task harness run through the server for each (`results/serve/`); vLLM + Kubernetes path written for GPU, not executed → [serve/README.md](serve/README.md) |
 
@@ -232,7 +232,7 @@ python scripts/inspect_run.py results/runs/granite-4.0-350m --label wrong_answer
 |---|---|---|---|---|---|
 | none (untuned, served f16) | 0 | – | 59.3 % | 35.5 % | wrong_tool 24, incomplete_chain 16 |
 | 1 | 0.053 | 3.03 → 0.14 | **38.7 %** | 32.3 % | no_final_answer 42, semantically_wrong_call 21 |
-| 4 | 0.211 | 3.03 → 0.06 | *evaluation being completed (81/150 logged so far)* | | |
+| 4 | 0.211 | 3.03 → 0.06 | **48.0 %** | 35.5 % | no_final_answer 26, semantically_wrong_call 18 |
 | 16, 64 | | *training — rows are appended by `scripts/plot_sweep.py` when the runs finish* | | | |
 
 ![rank sweep](docs/figures/lora_rank_sweep.png)
@@ -245,6 +245,13 @@ python scripts/inspect_run.py results/runs/granite-4.0-350m --label wrong_answer
   the lost final turn: the 1024-token training window truncating some final answers, and 290 examples being
   too few for the rank-1 update to learn both the call and the answer behaviour; the r=4/16/64 runs will show
   whether rank or data is the limit.
+* **r=4 recovers part of the gap (48.0 %) and shows what the training data does teach**: document questions go
+  from 0/20 to **8/20** (the model now routes plain policy questions to `doc_search` — the ablation's failure,
+  learned from data rather than prompt cues), `wrong_tool` drops 24 → 5 and the calc/SQL categories are intact
+  (24/30, 26/30). What it does *not* fix yet: the lost final turn (`no_final_answer` 26), unit conversion
+  (11/30 — the adapter over-triggers on numbers), multi-step chains (2/25) and the no-tool questions (1/10: it
+  now calls tools for everything). Fine-tuning on oracle trajectories moved the failures from *planning* to
+  *finishing* — exactly the kind of shift a single accuracy number hides and the taxonomy shows.
 * Caveat on comparability: adapters are served from bf16 and the untuned baseline from f16 (both via llama.cpp);
   the untuned model's f16 and fp32 runs agree within two tasks, so the comparison stands, and a bf16 baseline
   run is queued for a like-for-like line.

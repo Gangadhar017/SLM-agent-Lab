@@ -1,3 +1,3 @@
 rank,lr,seed,trainable_pct,eval_loss_before,eval_loss_after,final_train_loss,train_time_s,eval_backend,accuracy,accuracy_ood,doc_single,multi_step,malformed_rate,planning_failures,accuracy_int4,malformed_rate_int4
 1,0.0002,0,0.053,3.0338,0.1381,0.0335,1896.8,llama.cpp bf16,0.3867,0.3226,0.05,0.12,0.053,18,0.0,0.0
-4,0.0002,0,0.211,3.0338,0.0608,0.003,2721.7,llama.cpp bf16,0.6667,0.375,,,0.037,1,,
+4,0.0002,0,0.211,3.0338,0.0608,0.003,2721.7,llama.cpp bf16,0.48,0.3548,0.4,0.08,0.033,18,,
