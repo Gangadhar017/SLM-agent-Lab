@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.pyc
+*.egg-info/
+build/
+dist/
+.venv/
+venv/
+.pytest_cache/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Model weights and adapters (download/train them, don't commit them)
+*.safetensors
+*.bin
+*.gguf
+results/sweep/**/adapter_model*
+results/sweep/**/checkpoint*/
+
+# Large or noisy generated artefacts
+data/company.sqlite
+data/sft/*.jsonl
+results/logs/
+results/**/eval/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
