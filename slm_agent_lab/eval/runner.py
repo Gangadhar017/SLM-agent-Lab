@@ -13,6 +13,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from ..agent.loop import run_task
+from ..paths import ROOT
 from ..tasks.schema import Task
 from .scoring import score_answer
 from .taxonomy import classify
@@ -32,23 +33,36 @@ def _done_ids(path: Path) -> set[str]:
     return ids
 
 
+def _relative(value):
+    """Paths in meta are stored relative to the repo root so logs carry no machine-specific prefixes."""
+    if isinstance(value, (str, Path)) and value and Path(str(value)).is_absolute():
+        try:
+            return Path(value).resolve().relative_to(ROOT).as_posix()
+        except ValueError:
+            return Path(value).name
+    return value
+
+
 def run_eval(backend, tasks: list[Task], out_dir: str | Path, max_steps: int = 6, resume: bool = True,
-             progress: bool = True, extra_meta: dict | None = None) -> list[dict]:
+             progress: bool = True, extra_meta: dict | None = None, system_prompt: str | None = None,
+             tools: list[dict] | None = None) -> list[dict]:
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
     traj_path = out_dir / "trajectories.jsonl"
     meta = {
         "model": getattr(backend, "model_id", None),
-        "adapter": getattr(backend, "adapter", None),
+        "adapter": _relative(getattr(backend, "adapter", None)),
         "label": backend.label,
         "backend": type(backend).__name__,
         "max_new_tokens": getattr(backend, "max_new_tokens", None),
         "max_steps": max_steps,
         "n_tasks": len(tasks),
+        "system_prompt_override": system_prompt is not None,
+        "tools_override": [t["function"]["name"] for t in tools] if tools is not None else None,
         "started": datetime.now(timezone.utc).isoformat(),
         "platform": platform.platform(),
         "python": platform.python_version(),
-        **(extra_meta or {}),
+        **{k: _relative(v) for k, v in (extra_meta or {}).items()},
     }
     with open(out_dir / "meta.json", "w", encoding="utf-8") as f:
         json.dump(meta, f, indent=2)
@@ -68,7 +82,12 @@ def run_eval(backend, tasks: list[Task], out_dir: str | Path, max_steps: int = 6
     n_correct = 0
     with open(traj_path, "a", encoding="utf-8") as f:
         for task in iterator:
-            traj = run_task(backend, task, max_steps=max_steps).to_dict()
+            kwargs = {"max_steps": max_steps}
+            if system_prompt is not None:
+                kwargs["system_prompt"] = system_prompt
+            if tools is not None:
+                kwargs["tools"] = tools
+            traj = run_task(backend, task, **kwargs).to_dict()
             score = score_answer(task.expected, traj["final_answer"])
             tax = classify(task.to_dict(), traj, score)
             rec = {

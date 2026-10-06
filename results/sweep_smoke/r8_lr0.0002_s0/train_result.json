@@ -1,8 +1,8 @@
 {
   "result": {
     "model_id": "ibm-granite/granite-4.0-350m",
-    "data_path": "C:\\Users\\om200\\OneDrive\\Desktop\\slm-agent-lab\\data\\sft\\oracle_train.jsonl",
-    "out_dir": "results\\sweep_smoke\\r8_lr0.0002_s0",
+    "data_path": "data/sft/oracle_train.jsonl",
+    "out_dir": "results/sweep_smoke/r8_lr0.0002_s0",
     "rank": 8,
     "alpha_ratio": 2.0,
     "lr": 0.0002,

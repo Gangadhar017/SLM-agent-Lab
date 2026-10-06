@@ -9,7 +9,7 @@
   "started": "2026-10-06T13:12:30.343885+00:00",
   "platform": "Windows-11-10.0.26200-SP0",
   "python": "3.12.10",
-  "tasks_file": "C:\\Users\\om200\\OneDrive\\Desktop\\slm-agent-lab\\data\\tasks\\test.jsonl",
+  "tasks_file": "data/tasks/test.jsonl",
   "limit": 150,
   "categories": null,
   "finished": "2026-10-06T13:47:17.135362+00:00",

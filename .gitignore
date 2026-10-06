@@ -22,7 +22,6 @@ results/sweep/**/checkpoint*/
 data/company.sqlite
 data/sft/*.jsonl
 results/logs/
-results/**/eval/
 
 # OS / editor
 .DS_Store

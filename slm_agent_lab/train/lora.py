@@ -15,7 +15,20 @@ import time
 from dataclasses import asdict, dataclass
 from pathlib import Path
 
+from ..paths import ROOT
+
 DEFAULT_TARGETS = ["q_proj", "k_proj", "v_proj", "o_proj"]
+
+
+def _relative(path: str) -> str:
+    """Store paths relative to the repo root so result files carry no machine-specific prefixes."""
+    p = Path(path)
+    if p.is_absolute():
+        try:
+            return p.resolve().relative_to(ROOT).as_posix()
+        except ValueError:
+            return p.name
+    return p.as_posix()
 
 
 @dataclass
@@ -178,6 +191,8 @@ def train_lora(cfg: TrainConfig, progress: bool = True) -> dict:
     tokenizer.save_pretrained(out_dir)
     result = {
         **asdict(cfg),
+        "data_path": _relative(cfg.data_path),
+        "out_dir": _relative(cfg.out_dir),
         "target_modules": ",".join(cfg.target_modules),
         "n_train": len(train_tok), "n_eval": len(eval_tok), "total_steps": total_steps,
         "trainable_params": n_trainable, "total_params": n_total,

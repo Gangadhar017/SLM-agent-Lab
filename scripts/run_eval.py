@@ -8,7 +8,6 @@ Examples
 """
 
 import argparse
-import random
 import re
 from pathlib import Path
 
@@ -16,6 +15,7 @@ import _bootstrap  # noqa: F401
 
 from slm_agent_lab.eval.report import summarize, load_runs
 from slm_agent_lab.eval.runner import run_eval
+from slm_agent_lab.eval.subset import stratified_subset
 from slm_agent_lab.paths import RESULTS_DIR, TASKS_DIR
 from slm_agent_lab.tasks.schema import load_tasks
 
@@ -40,20 +40,12 @@ def main() -> None:
     args = ap.parse_args()
 
     tasks = load_tasks(args.tasks)
+    # subset first, filter second: "--limit 150 --categories doc_single" is exactly the doc tasks of the standard
+    # 150-task subset, so category-level runs stay comparable with the full baseline runs
+    tasks = stratified_subset(tasks, args.limit, args.seed)
     if args.categories:
         keep = set(args.categories.split(","))
         tasks = [t for t in tasks if t.category in keep]
-    if args.limit and args.limit < len(tasks):
-        # stratified: keep category proportions, deterministic order
-        rng = random.Random(args.seed)
-        by_cat: dict[str, list] = {}
-        for t in tasks:
-            by_cat.setdefault(t.category, []).append(t)
-        chosen = []
-        for cat, items in by_cat.items():
-            k = max(1, round(args.limit * len(items) / len(tasks)))
-            chosen.extend(rng.sample(items, min(k, len(items))))
-        tasks = chosen[: args.limit]
 
     if args.backend == "hf":
         from slm_agent_lab.agent.backends import HFBackend
