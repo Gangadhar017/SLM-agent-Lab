@@ -1,0 +1,92 @@
+{
+  "models": {
+    "Qwen2.5-0.5B-Instruct": {
+      "n": 150,
+      "accuracy": 0.3133,
+      "strict_accuracy": 0.3,
+      "accuracy_iid": 0.3613,
+      "accuracy_ood": 0.129,
+      "accuracy_by_category": {
+        "calc_single": 0.2,
+        "convert_single": 0.667,
+        "sql_single": 0.333,
+        "doc_single": 0.0,
+        "multi_step": 0.04,
+        "no_tool": 0.8,
+        "unanswerable": 0.4
+      },
+      "failure_labels": {
+        "no_tool_call": 56,
+        "success": 47,
+        "wrong_tool": 15,
+        "hallucinated_tool": 11,
+        "incomplete_chain": 9,
+        "wrong_answer_after_correct_tools": 3,
+        "fabricated_answer": 3,
+        "invalid_arguments": 2,
+        "unnecessary_tool_then_wrong": 2,
+        "semantically_wrong_call": 1,
+        "no_final_answer": 1
+      },
+      "failure_groups": {
+        "planning": 82,
+        "success": 47,
+        "syntax": 14,
+        "reasoning": 7
+      },
+      "mean_steps": 1.49,
+      "mean_tool_calls": 0.53,
+      "tool_error_rate": 0.35,
+      "malformed_rate": 0.0,
+      "json_repaired_rate": 0.0,
+      "unnecessary_tool_rate": 0.3,
+      "mean_completion_tokens": 87.1,
+      "mean_prompt_tokens": 1501.0,
+      "completion_tokens_per_s": 3.12,
+      "mean_wall_time_s": 27.97
+    },
+    "granite-4.0-350m": {
+      "n": 150,
+      "accuracy": 0.58,
+      "strict_accuracy": 0.5,
+      "accuracy_iid": 0.6555,
+      "accuracy_ood": 0.2903,
+      "accuracy_by_category": {
+        "calc_single": 0.867,
+        "convert_single": 0.9,
+        "sql_single": 0.867,
+        "doc_single": 0.0,
+        "multi_step": 0.08,
+        "no_tool": 0.3,
+        "unanswerable": 0.6
+      },
+      "failure_labels": {
+        "success": 87,
+        "wrong_tool": 24,
+        "incomplete_chain": 16,
+        "invalid_arguments": 8,
+        "unnecessary_tool_then_wrong": 7,
+        "semantically_wrong_call": 4,
+        "fabricated_answer": 2,
+        "malformed_tool_call": 1,
+        "wrong_answer_after_correct_tools": 1
+      },
+      "failure_groups": {
+        "success": 87,
+        "planning": 47,
+        "syntax": 9,
+        "reasoning": 7
+      },
+      "mean_steps": 2.0,
+      "mean_tool_calls": 0.99,
+      "tool_error_rate": 0.161,
+      "malformed_rate": 0.007,
+      "json_repaired_rate": 0.0,
+      "unnecessary_tool_rate": 0.8,
+      "mean_completion_tokens": 61.4,
+      "mean_prompt_tokens": 2056.4,
+      "completion_tokens_per_s": 4.42,
+      "mean_wall_time_s": 13.91
+    }
+  }
+}
