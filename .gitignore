@@ -29,3 +29,10 @@ results/**/eval/
 Thumbs.db
 .vscode/
 .idea/
+
+# adapter directories: keep adapter_config.json + train_result.json, drop tokenizer copies
+results/sweep*/**/tokenizer*
+results/sweep*/**/special_tokens_map.json
+results/sweep*/**/chat_template.jinja
+results/sweep*/**/added_tokens.json
+results/sweep*/**/README.md
