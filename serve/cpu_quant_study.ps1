@@ -14,6 +14,7 @@ param(
     [string]$LlamaCppSrc = "C:\Users\om200\tools\llama.cpp",
     [string]$Python = "C:\Users\om200\.venvs\slm-agent-lab\Scripts\python.exe",
     [string]$Precisions = "f16,q8_0,q4_k_m",
+    [string]$ConvertType = "f16",   # GGUF type written by the converter; use q8_0 when an f16 file would not fit on disk
     [int]$Limit = 150,
     [int]$Port = 8080,
     [int]$Threads = 4,
@@ -35,20 +36,20 @@ $quant = Get-ChildItem $pkg.FullName -Recurse -Filter llama-quantize.exe | Selec
 if (-not $server -or -not $quant) { throw "llama-server.exe / llama-quantize.exe not found in $($pkg.FullName)" }
 Write-Output "llama-server: $server"
 
-# 1. convert to GGUF f16 (once)
-$f16 = Join-Path $models "$Tag-f16.gguf"
-if (-not (Test-Path $f16)) {
-    Write-Output "converting $ModelDir -> $f16"
-    & $Python (Join-Path $LlamaCppSrc "convert_hf_to_gguf.py") $ModelDir --outtype f16 --outfile $f16 2>&1 | Select-Object -Last 3
+# 1. convert to GGUF (once); the converted file is the source for the quantisations
+$src = Join-Path $models "$Tag-$ConvertType.gguf"
+if (-not (Test-Path $src)) {
+    Write-Output "converting $ModelDir -> $src"
+    & $Python (Join-Path $LlamaCppSrc "convert_hf_to_gguf.py") $ModelDir --outtype $ConvertType --outfile $src 2>&1 | Select-Object -Last 3
 }
-if (-not (Test-Path $f16)) { throw "conversion failed" }
+if (-not (Test-Path $src)) { throw "conversion failed" }
 
 # 2. quantise (once per precision)
-$files = @{ "f16" = $f16 }
+$files = @{ $ConvertType = $src }
 foreach ($p in $Precisions.Split(",")) {
-    if ($p -eq "f16") { continue }
+    if ($p -eq $ConvertType) { continue }
     $out = Join-Path $models "$Tag-$p.gguf"
-    if (-not (Test-Path $out)) { & $quant $f16 $out $p.ToUpper() 2>&1 | Select-Object -Last 2 }
+    if (-not (Test-Path $out)) { & $quant $src $out $p.ToUpper() 2>&1 | Select-Object -Last 2 }
     if (Test-Path $out) { $files[$p] = $out }
 }
 Get-ChildItem $models -Filter "$Tag-*.gguf" | ForEach-Object { "{0}: {1:N0} MB" -f $_.Name, ($_.Length / 1MB) }
@@ -67,7 +68,7 @@ foreach ($p in $Precisions.Split(",")) {
     }
     if (-not $ok) { Write-Output "server for $label did not become healthy"; Stop-Process -Id $proc.Id -Force -ErrorAction SilentlyContinue; continue }
     $runDir = "results\serve\harness_$label"
-    cmd /c "`"$Python`" scripts\run_eval.py --backend openai --base-url http://127.0.0.1:$Port --model $label --tokenizer $Tokenizer --limit $Limit --seed 0 --max-new-tokens 256 --out $runDir > results\logs\serve_harness_$label.log 2>&1"
+    cmd /c "`"$Python`" scripts\run_eval.py --backend openai --base-url http://127.0.0.1:$Port --model $label --label $label --tokenizer $Tokenizer --limit $Limit --seed 0 --max-new-tokens 256 --out $runDir > results\logs\serve_harness_$label.log 2>&1"
     Get-Content "results\logs\serve_harness_$label.log" | Where-Object { $_ -match "accuracy=" }
     if ($Bench) {
         cmd /c "`"$Python`" serve\bench.py --base-url http://127.0.0.1:$Port --model $label --tokenizer $Tokenizer --tag $label --concurrency 1,2,4,8 --requests-per-worker 3 --max-tokens 64 > results\logs\serve_bench_$label.log 2>&1"
