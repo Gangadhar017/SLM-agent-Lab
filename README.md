@@ -25,7 +25,7 @@ distillation on a T4, vLLM on Kubernetes) are written and documented but not exe
 | stage | state |
 |---|---|
 | 1. harness, task set, taxonomy, baselines | **done** — 24 unit tests, 300-task test split + 300-task train split, baseline runs for Granite 4.0 350M and Qwen2.5 0.5B logged in `results/runs/` |
-| 2. LoRA rank sweep (CPU) | **ranks 1, 4, 16 trained and evaluated** on the 150-task subset (38.7 / 48.0 / 54.0 % vs 59.3 % untuned — accuracy rises with rank, failures move from planning to finishing/synthesis); r=64 trained, evaluation running. Teacher-filtered distillation on GPU = `notebooks/02_lora_sweep_kaggle.ipynb` |
+| 2. LoRA rank sweep (CPU) | **ranks 1, 4, 16 trained and evaluated** on the 150-task subset (38.7 / 48.0 / 54.0 % vs 59.3 % untuned — accuracy rises with rank, failures move from planning to finishing/synthesis); r=64 not completed (interrupted). Teacher-filtered distillation on GPU = `notebooks/02_lora_sweep_kaggle.ipynb` |
 | 3. LoRA paper reproduction | **done for r = 1/4/16** — subspace overlap between adapters of different rank sits at the random-matrix baseline (claim does not reproduce at this scale); r=64 and seed-vs-seed pending → [REPRODUCTION.md](REPRODUCTION.md) |
 | 4. serving / quantisation | **run on CPU** — Granite-4.0-350M converted to GGUF, served with llama.cpp at f16 / int8 / int4, the 150-task harness run through the server for each (`results/serve/`); vLLM + Kubernetes path written for GPU, not executed → [serve/README.md](serve/README.md) |
 
@@ -234,7 +234,7 @@ python scripts/inspect_run.py results/runs/granite-4.0-350m --label wrong_answer
 | 1 | 0.053 | 3.03 → 0.14 | **38.7 %** | 32.3 % | no_final_answer 42, semantically_wrong_call 21 |
 | 4 | 0.211 | 3.03 → 0.06 | 48.0 % | 35.5 % | no_final_answer 26, semantically_wrong_call 18 |
 | 16 | 0.839 | 3.03 → 0.05 | **54.0 %** | 29.0 % | semantically_wrong_call 17, wrong_answer_after_correct_tools 13 |
-| 64 | 3.3 | *trained; evaluation running — `scripts/plot_sweep.py` adds the row* | | | |
+| 64 | 3.3 | *not completed — training was interrupted (CPU budget); re-run with `scripts/lora_sweep.py --ranks 64`* | | | |
 
 ![rank sweep](docs/figures/lora_rank_sweep.png)
 

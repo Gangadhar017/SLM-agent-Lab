@@ -66,7 +66,7 @@ served from bf16 through llama.cpp, 150-task subset).** Rows for r=16 and r=64 a
 | 1 | 0.053 | 3.03 → 0.14 | 38.7 % | 32.3 % | 18 |
 | 4 | 0.211 | 3.03 → 0.06 | 48.0 % | 35.5 % | 18 |
 | 16 | 0.839 | 3.03 → 0.05 | 54.0 % | 29.0 % | 18 |
-| 64 | 3.3 | trained | *evaluation running* | | |
+| 64 | 3.3 | *not completed (training interrupted)* | | | |
 
 Reading: accuracy rises monotonically with rank (38.7 → 48.0 → 54.0 %) and none of r = 1/4/16 reaches the
 untuned model (59.3 %) despite converged SFT losses; the failure mix shifts from planning (`wrong_tool` 24 → 5)
@@ -79,7 +79,7 @@ this scale**: r = 1 is far from r = 16, and the curve has not flattened by r = 1
 | r=1 vs r=4 | 0.0027 | 0.0009 |
 | r=1 vs r=16 | 0.0022 | 0.0018 |
 | r=4 vs r=16 | 0.0015 | 0.0010 |
-| r=4 vs r=64, r=16 vs r=64 | *computed when the r=64 run finishes* | |
+| r=4 vs r=64, r=16 vs r=64 | *not run (r=64 not completed)* | |
 | r=64 seed 0 vs seed 1 | *not run (CPU budget)* | |
 
 Reading: **claim 2 (adapters of different rank share their top directions) does not reproduce here.** The
