@@ -31,11 +31,71 @@ need a GPU (free Kaggle/Colab T4 is enough for stage 2).
 ## Headline results (stage 1, CPU laptop, greedy decoding, 150-task stratified subset)
 
 <!-- RESULTS:BEGIN -->
-_Being filled from `results/report/summary.md` — see that file for the full tables._
+| model | n | acc | strict acc | acc (iid) | acc (ood) | tool calls/task | tool error rate | malformed rate | compl. tokens/task | tokens/s |
+|---|---|---|---|---|---|---|---|---|---|---|
+| Qwen2.5-0.5B-Instruct | 150 | 31.3% | 30.0% | 36.1% | 12.9% | 0.53 | 35.0% | 0.0% | 87.1 | 3.12 |
+| granite-4.0-350m | 150 | 58.0% | 50.0% | 65.5% | 29.0% | 0.99 | 16.1% | 0.7% | 61.4 | 4.42 |
+
+
+#### Accuracy by category
+
+| model | calc_single | convert_single | sql_single | doc_single | multi_step | no_tool | unanswerable |
+|---|---|---|---|---|---|---|---|
+| Qwen2.5-0.5B-Instruct | 20% | 67% | 33% | 0% | 4% | 80% | 40% |
+| granite-4.0-350m | 87% | 90% | 87% | 0% | 8% | 30% | 60% |
+
+
+#### Failure taxonomy (count of tasks)
+
+| model | no_final_answer | malformed_tool_call | hallucinated_tool | invalid_arguments | no_tool_call | wrong_tool | incomplete_chain | semantically_wrong_call | wrong_answer_after_correct_tools | unnecessary_tool_then_wrong | fabricated_answer |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| Qwen2.5-0.5B-Instruct | 1 | 0 | 11 | 2 | 56 | 15 | 9 | 1 | 3 | 2 | 3 |
+| granite-4.0-350m | 0 | 1 | 0 | 8 | 0 | 24 | 16 | 4 | 1 | 7 | 2 |
+
+
+#### Failure groups
+
+| model | syntax (can't talk to tools) | planning (wrong/no tool) | reasoning (wrong use/answer) |
+|---|---|---|---|
+| Qwen2.5-0.5B-Instruct | 14 (9%) | 82 (55%) | 7 (5%) |
+| granite-4.0-350m | 9 (6%) | 47 (31%) | 7 (5%) |
 <!-- RESULTS:END -->
 
 ![accuracy by category](docs/figures/accuracy_by_category.png)
 ![failure taxonomy](docs/figures/failure_taxonomy.png)
+
+### Key findings (150 tasks per model, same stratified subset, greedy decoding, CPU fp32)
+
+1. **Granite-4.0-350M: 58 % overall, Qwen2.5-0.5B: 31 %.** On single-tool tasks Granite is strong (calc 87 %,
+   unit conversion 90 %, SQL 87 %) and emits a well-formed `<tool_call>` block in 149 of 150 trajectories
+   (malformed rate 0.7 %). Its failures are almost entirely **planning** (47 of 63 failures), not syntax.
+2. **Tool selection collapses to the "database" tool.** Both models score **0 % on document questions**: Granite
+   answers them with `sql_query` (13/20, inventing tables such as `wellness_sessions`) or an invented
+   calculator expression; Qwen narrates a tool it never calls. Granite *does* call `doc_search` — 15 times,
+   7 of them in multi-step prompts that name a document ("Using the Laptop Pro 14 specification…") — so the
+   skill exists but is only triggered by a surface cue. This is the first thing stage-2 fine-tuning should fix,
+   and the train split contains exactly those trajectories.
+3. **Qwen2.5-0.5B's dominant failure is not calling tools at all** (`no_tool_call`, 56/150): it does the
+   arithmetic in its head (153 / 3.5 → "44.62") or describes a plan ("I will use unit_convert…") and stops. When
+   it does call, 13 of 81 calls use a **hallucinated tool name** (`sqrt`, `div`, `mathematical_operation`,
+   `round`) lifted from the calculator's description — a tool-description design lesson: listing function
+   names invites the model to call them as tools.
+4. **Multi-step is where both break** (8 % and 4 %): Granite's main label is `incomplete_chain` (16) — it runs
+   the SQL, gets 105 750, and reports it as the answer "in thousands" instead of calling the calculator. Chains
+   requiring 2+ tools are the capability gap, not individual tool use.
+5. **Right tools, corrupted numbers.** The rare `wrong_answer_after_correct_tools` cases are all number-copying
+   errors: SQL returns −26 305.6, the model writes "26,906"; −16 795 becomes "17,995". Small models drop signs
+   and transpose digits when transcribing observations — a failure that neither retrieval nor planning fixes.
+6. **OOD generalisation halves accuracy** (Granite 65.5 % iid → 29.0 % ood; Qwen 36.1 % → 12.9 %), mostly because
+   the OOD set is dominated by the harder chains and unseen-document questions.
+7. **Opposite no-tool behaviour.** Granite over-uses tools on general-knowledge questions (8/10, e.g.
+   `doc_search("URL")`, then answers "no results found" → 30 %), Qwen answers them directly (80 %). Over- and
+   under-use of tools are different failure modes with different fixes; the taxonomy keeps them separate.
+8. **Strict vs lenient scoring matters for Granite** (58 % lenient vs 50 % strict): in 8 % of its tasks the right
+   value is in the answer but the sentence ends on a different number — a formatting problem worth measuring
+   rather than hiding in either direction.
+9. **Cost.** Granite needed 61 completion tokens/task vs Qwen's 87 and ran 40 % faster per token (4.4 vs 3.1
+   tok/s on this CPU) — the more accurate model is also the cheaper one, which is not a given.
 
 ## Stage 1 — the harness
 
