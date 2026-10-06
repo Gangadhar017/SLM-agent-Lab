@@ -25,8 +25,8 @@ distillation on a T4, vLLM on Kubernetes) are written and documented but not exe
 | stage | state |
 |---|---|
 | 1. harness, task set, taxonomy, baselines | **done** — 24 unit tests, 300-task test split + 300-task train split, baseline runs for Granite 4.0 350M and Qwen2.5 0.5B logged in `results/runs/` |
-| 2. distillation data + LoRA sweep | **code done, pipeline smoke-tested on CPU**; full sweep = `notebooks/02_lora_sweep_kaggle.ipynb` (≈ 2 h on a T4) |
-| 3. LoRA paper reproduction | **analysis code done + smoke-tested**; numbers pending the stage-2 sweep → [REPRODUCTION.md](REPRODUCTION.md) |
+| 2. LoRA rank sweep (CPU) | **running** — ranks 1 and 4 trained; r=1 evaluated on the 150-task subset (38.7 % vs 59.3 % untuned: worse), r=4's evaluation is being completed, r=16 and r=64 training; results land in `results/sweep/` and `results/serve/` as they finish. Teacher-filtered distillation on GPU = `notebooks/02_lora_sweep_kaggle.ipynb` |
+| 3. LoRA paper reproduction | **first numbers in** (r=1 vs r=4 subspace overlap, with random baseline); r=4 vs r=64 and seed-vs-seed pending the sweep → [REPRODUCTION.md](REPRODUCTION.md) |
 | 4. serving / quantisation | **run on CPU** — Granite-4.0-350M converted to GGUF, served with llama.cpp at f16 / int8 / int4, the 150-task harness run through the server for each (`results/serve/`); vLLM + Kubernetes path written for GPU, not executed → [serve/README.md](serve/README.md) |
 
 ## Headline results (stage 1, CPU laptop, greedy decoding, 150-task stratified subset)
@@ -225,6 +225,34 @@ python scripts/inspect_run.py results/runs/granite-4.0-350m --label wrong_answer
   writes one row per run (`sweep.csv`: eval loss before/after, trainable %, train time, harness accuracy).
 * `notebooks/02_lora_sweep_kaggle.ipynb` runs the whole stage on a free T4: teacher = Granite 4.0 H-Micro (3B),
   student = Granite 4.0 350M, reduced grid 4 ranks × 2 lrs × 3 seeds, plots accuracy vs. rank with error bars.
+
+### Results so far (CPU, oracle trajectories, lr 2e-4, α = 2r, 2 epochs, seed 0; adapters merged and served from bf16)
+
+| rank | trainable % | held-out SFT loss before → after | accuracy (150 tasks) | OOD | main failure labels |
+|---|---|---|---|---|---|
+| none (untuned, served f16) | 0 | – | 59.3 % | 35.5 % | wrong_tool 24, incomplete_chain 16 |
+| 1 | 0.053 | 3.03 → 0.14 | **38.7 %** | 32.3 % | no_final_answer 42, semantically_wrong_call 21 |
+| 4 | 0.211 | 3.03 → 0.06 | *evaluation being completed (81/150 logged so far)* | | |
+| 16, 64 | | *training — rows are appended by `scripts/plot_sweep.py` when the runs finish* | | | |
+
+![rank sweep](docs/figures/lora_rank_sweep.png)
+
+* **r=1 makes the agent worse than no fine-tuning** (38.7 % vs 59.3 %), even though its held-out SFT loss
+  converges (3.03 → 0.14). The taxonomy says why: a new dominant failure, `no_final_answer` (42/150 — the model
+  emits a tool call and then never produces the closing answer turn), plus `semantically_wrong_call` (21), while
+  planning failures fall (47 → 18) and `doc_search` starts to be used for policy questions (1/20 vs 0/20).
+  Low loss on oracle trajectories is therefore **not** a proxy for task accuracy — the harness is. Suspects for
+  the lost final turn: the 1024-token training window truncating some final answers, and 290 examples being
+  too few for the rank-1 update to learn both the call and the answer behaviour; the r=4/16/64 runs will show
+  whether rank or data is the limit.
+* Caveat on comparability: adapters are served from bf16 and the untuned baseline from f16 (both via llama.cpp);
+  the untuned model's f16 and fp32 runs agree within two tasks, so the comparison stands, and a bf16 baseline
+  run is queued for a like-for-like line.
+* The adapters' int8/int4 numbers through llama.cpp are **not valid** and are not reported: the merged models
+  produce degenerate text under llama.cpp's quantised kernels although the same weights survive fake int8 and
+  int4 quantisation in PyTorch (see the float16 note in stage 4) — an open llama.cpp interaction, logged in
+  `results/serve/harness_lora-*-q*` for reference only.
+* Scope: one learning rate, one seed, 290 examples, CPU. The GPU notebook is the full controlled grid.
 
 ## Stage 3 — reproduction
 

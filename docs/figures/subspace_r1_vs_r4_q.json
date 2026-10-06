@@ -1,0 +1,51 @@
+{
+  "modules": [
+    "model.layers.0.self_attn.q_proj",
+    "model.layers.1.self_attn.q_proj",
+    "model.layers.10.self_attn.q_proj",
+    "model.layers.11.self_attn.q_proj",
+    "model.layers.12.self_attn.q_proj",
+    "model.layers.13.self_attn.q_proj",
+    "model.layers.14.self_attn.q_proj",
+    "model.layers.15.self_attn.q_proj",
+    "model.layers.16.self_attn.q_proj",
+    "model.layers.17.self_attn.q_proj",
+    "model.layers.18.self_attn.q_proj",
+    "model.layers.19.self_attn.q_proj",
+    "model.layers.2.self_attn.q_proj",
+    "model.layers.20.self_attn.q_proj",
+    "model.layers.21.self_attn.q_proj",
+    "model.layers.22.self_attn.q_proj",
+    "model.layers.23.self_attn.q_proj",
+    "model.layers.24.self_attn.q_proj",
+    "model.layers.25.self_attn.q_proj",
+    "model.layers.26.self_attn.q_proj",
+    "model.layers.27.self_attn.q_proj",
+    "model.layers.3.self_attn.q_proj",
+    "model.layers.4.self_attn.q_proj",
+    "model.layers.5.self_attn.q_proj",
+    "model.layers.6.self_attn.q_proj",
+    "model.layers.7.self_attn.q_proj",
+    "model.layers.8.self_attn.q_proj",
+    "model.layers.9.self_attn.q_proj"
+  ],
+  "rank_a": 1,
+  "rank_b": 4,
+  "mean_grid": [
+    [
+      0.002693912328148989,
+      0.004205519974805482,
+      0.005402552693599968,
+      0.00691817379265558
+    ]
+  ],
+  "top1_overlap": 0.002693912328148989,
+  "topk_overlap_diag": [
+    0.002693912328148989
+  ],
+  "full_overlap": 0.00691817379265558,
+  "random_baseline_top1": 0.0008596153766537877,
+  "random_baseline_diag": [
+    0.0008596153766537877
+  ]
+}

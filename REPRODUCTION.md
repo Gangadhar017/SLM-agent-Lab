@@ -56,22 +56,34 @@ code run: eval loss moved 3.45 → 2.50 (r=4) and 3.45 → 2.03 (r=8) after two 
 random), which is exactly what two optimiser steps from a random LoRA-A initialisation should give. These are
 pipeline checks, not results, and are not reported in the tables below.
 
-Fill in after the sweep:
+**CPU sweep (Granite-4.0-350M, oracle trajectories, lr 2e-4, α = 2r, 2 epochs, seed 0; adapters merged and
+served from bf16 through llama.cpp, 150-task subset).** Rows for r=16 and r=64 are added as those runs finish
+(`python scripts/plot_sweep.py` regenerates the table and figure from `results/`).
 
-| rank r | trainable params (%) | accuracy lr=1e-4 | accuracy lr=2e-4 | accuracy lr=5e-4 |
-|---|---|---|---|---|
-| baseline (no LoRA) | 0 | — | — | — |
-| 1 | | | | |
-| 2 | | | | |
-| 4 | | | | |
-| 8 | | | | |
-| 16 | | | | |
-| 64 | | | | |
+| rank r | trainable params (%) | SFT eval loss before → after | task accuracy | OOD accuracy | planning failures |
+|---|---|---|---|---|---|
+| baseline (no LoRA) | 0 | — | 59.3 % | 35.5 % | 47 |
+| 1 | 0.053 | 3.03 → 0.14 | 38.7 % | 32.3 % | 18 |
+| 4 | 0.211 | 3.03 → 0.06 | *evaluation being completed* | | |
+| 16 | 0.84 | *pending* | | | |
+| 64 | 3.3 | *pending* | | | |
 
-| comparison | φ top-1 | φ diag (first 4) | random baseline top-1 |
-|---|---|---|---|
-| r=4 vs r=64 (q_proj) | | | |
-| r=64 seed 0 vs seed 1 (q_proj) | | | |
+Reading so far: r=1 is **not** sufficient on this task — it under-performs the untuned model (38.7 % vs
+59.3 %) despite a converged SFT loss, mainly through a new `no_final_answer` failure. The paper's "r=1 already
+matches r=64" does not hold here; whether any rank beats the untuned model, and where the curve flattens, is
+decided by the r=4/16/64 runs.
+
+| comparison (q_proj, averaged over 28 layers) | φ top-1 | random-matrix baseline top-1 (d = 1024) |
+|---|---|---|
+| r=1 vs r=4 | 0.0027 | 0.0009 |
+| r=4 vs r=64 | *pending* | |
+| r=64 seed 0 vs seed 1 | *pending* | |
+
+Reading: the top direction learned at r=1 is about 3× more aligned with the r=4 subspace than a random
+direction would be — detectably shared, but nowhere near the paper's φ > 0.5 for GPT-3. At d = 1024 with 290
+training examples, "the useful update lives in one direction" is not what we observe; the r=4 adapter's
+performance jump is consistent with that. Treat as preliminary until the r=4/r=64 and seed comparisons are in
+(`docs/figures/subspace_r1_vs_r4_q.png` and `_random_baseline.png` hold the heat-maps).
 
 ## Where we expect numbers to differ, and how to read them
 
