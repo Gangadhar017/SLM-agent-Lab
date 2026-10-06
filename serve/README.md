@@ -5,8 +5,27 @@ p50/p95 latency across concurrency) **and** agent task accuracy through the same
 question is not "is int4 faster" (it is) but *which failure category grows first when you quantize a small
 tool-calling model* — does JSON formatting break before reasoning does?
 
-> This stage needs a GPU. It was **not** executed on the development laptop (no NVIDIA GPU); the scripts and
-> manifests are provided and tested only for syntax/import. Run on a cloud GPU node or a Kaggle T4 session.
+## What was actually run: the CPU path (llama.cpp)
+
+`cpu_quant_study.ps1` converts a Hugging Face checkpoint to GGUF (`convert_hf_to_gguf.py` from the llama.cpp
+repo), quantises it with `llama-quantize` (Q8_0 = int8, Q4_K_M = int4), serves each file with `llama-server`
+(OpenAI-compatible `/v1/completions`), runs `scripts/run_eval.py --backend openai` through it and commits the
+trajectories under `results/serve/harness_<tag>-<precision>/`. `scripts/plot_quant.py` turns those runs into
+the table and figure in the main README. Result for Granite-4.0-350M: int8 is lossless; int4 drops accuracy from
+59 % to 21 % entirely through malformed tool calls (the `<tool_call>` tag is still emitted, the JSON after it is
+not).
+
+```powershell
+winget install ggml.llamacpp ; pip install gguf ; git clone --depth 1 https://github.com/ggml-org/llama.cpp C:\tools\llama.cpp
+powershell -File serve/cpu_quant_study.ps1 -ModelDir <hf snapshot dir> -Tag base -Tokenizer ibm-granite/granite-4.0-350m -LlamaCppSrc C:\tools\llama.cpp
+powershell -File serve/cpu_quant_study.ps1 -ModelDir <merged adapter dir> -Tag lora-r16 -Bench   # -Bench only on an idle machine
+python scripts/plot_quant.py --tag base --tag lora-r16
+```
+
+## The GPU path (vLLM on Kubernetes) — written, not executed
+
+> The development laptop has no NVIDIA GPU; the manifests and `bench.py` are tested for syntax/import only.
+> Run on a cloud GPU node or a Kaggle T4 session.
 
 ## Precision sweep
 

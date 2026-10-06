@@ -16,8 +16,9 @@ A research-style project in four connected stages, built around one evaluation h
    accuracy vs. throughput, one point per (model, adapter, precision), coloured by dominant failure type
 ```
 
-Everything in stages 1–3 runs on a CPU laptop (that is where this was built); stage 2's full sweep and stage 4
-need a GPU (free Kaggle/Colab T4 is enough for stage 2).
+Everything here was run on a CPU laptop (4 cores, no GPU): stages 1–3 with PyTorch, stage 4 by serving GGUF
+quantisations with llama.cpp and running the same harness through the server. The GPU versions (teacher-filtered
+distillation on a T4, vLLM on Kubernetes) are written and documented but not executed.
 
 ## Status
 
@@ -26,7 +27,7 @@ need a GPU (free Kaggle/Colab T4 is enough for stage 2).
 | 1. harness, task set, taxonomy, baselines | **done** — 24 unit tests, 300-task test split + 300-task train split, baseline runs for Granite 4.0 350M and Qwen2.5 0.5B logged in `results/runs/` |
 | 2. distillation data + LoRA sweep | **code done, pipeline smoke-tested on CPU**; full sweep = `notebooks/02_lora_sweep_kaggle.ipynb` (≈ 2 h on a T4) |
 | 3. LoRA paper reproduction | **analysis code done + smoke-tested**; numbers pending the stage-2 sweep → [REPRODUCTION.md](REPRODUCTION.md) |
-| 4. serving benchmark | **scripts + K8s manifests written, not executed** (no GPU on the dev machine) → [serve/README.md](serve/README.md) |
+| 4. serving / quantisation | **run on CPU** — Granite-4.0-350M converted to GGUF, served with llama.cpp at f16 / int8 / int4, the 150-task harness run through the server for each (`results/serve/`); vLLM + Kubernetes path written for GPU, not executed → [serve/README.md](serve/README.md) |
 
 ## Headline results (stage 1, CPU laptop, greedy decoding, 150-task stratified subset)
 
@@ -202,11 +203,36 @@ python scripts/inspect_run.py results/runs/granite-4.0-350m --label wrong_answer
 formula, every deliberate deviation (350M vs 175B, tool-calling vs WikiSQL, 290 vs 56k examples) and how to
 read differences. Includes a random-matrix baseline so φ values have a reference at our hidden size.
 
-## Stage 4 — serving
+## Stage 4 — serving and quantisation
 
-[serve/README.md](serve/README.md): vLLM Deployment + Service + ServiceMonitor for Kubernetes, PromQL for the
-Grafana panels, and `serve/bench.py`, which sweeps concurrency (throughput, TTFT, p50/p95 latency) using the
-real agent prompts **and** runs the task harness through the server so each precision gets a failure taxonomy.
+The question: when you compress a small tool-calling model, **which failure type grows first?** Executed on CPU
+with llama.cpp (`serve/cpu_quant_study.ps1`): convert the 350M model to GGUF, quantise to int8 (Q8_0) and int4
+(Q4_K_M), serve each with `llama-server`, and run the same 150-task harness through its OpenAI-compatible
+endpoint via `OpenAICompatBackend` (identical prompt rendering and parsing as the local runs).
+
+| precision | file | accuracy | strict | malformed-call rate | failures: syntax / planning / reasoning |
+|---|---|---|---|---|---|
+| PyTorch fp32 (local, reference) | 1 400 MB | 58.0 % | 50.0 % | 0.7 % | 9 / 47 / 7 |
+| f16 (llama.cpp) | 708 MB | 59.3 % | 52.0 % | 0.0 % | 9 / 47 / 5 |
+| int8 Q8_0 (llama.cpp) | 378 MB | 58.7 % | 51.3 % | 0.7 % | 8 / 47 / 7 |
+| int4 Q4_K_M (llama.cpp) | 237 MB | **20.7 %** | 20.7 % | **59.3 %** | **84** / 30 / 5 |
+
+![quantisation](docs/figures/quantization_accuracy.png)
+
+* **int8 is free**: accuracy and the whole failure profile are unchanged at half the size.
+* **int4 breaks syntax, not reasoning.** The model still emits the `<tool_call>` opening tag — 102 malformed
+  fragments in 150 tasks — but what follows is prose or mental arithmetic instead of the JSON call
+  (`<tool_call>The average speed of the car can be calculated using the formula …`). Reasoning failures are
+  unchanged (5 vs 5); the collapse is entirely in the tag→JSON transition. For a tool-calling agent, the serving
+  precision floor is therefore set by *format fidelity*, which a plain perplexity or accuracy number would not
+  show. Natural follow-ups: whether the 1B model survives int4, and whether a fine-tuned adapter makes the
+  format more or less robust to quantisation.
+* The local fp32 run and the served f16 run agree within two tasks on the same subset, which also validates the
+  server path.
+
+Throughput/latency across concurrency (`serve/bench.py`) is measured on an idle machine and reported in
+`results/serve/bench.csv`. The GPU path — vLLM Deployment + Service + ServiceMonitor for Kubernetes, PromQL for
+the Grafana panels — is in [serve/README.md](serve/README.md).
 
 ## Repository layout
 
@@ -260,7 +286,8 @@ runs are resumable and `--limit` draws the same stratified subset for every mode
 * Granite 4.0 1B and Qwen2.5 1.5B baselines on the full 300 tasks (overnight CPU job, or minutes on a GPU)
 * Full stage-2 sweep on Kaggle, fill REPRODUCTION.md tables
 * DPO on the harness's correct/incorrect trajectory pairs (preference data falls out of the logs)
-* Stage 4 on a rented GPU node; fused RMSNorm kernel in OpenAI Triton vs. PyTorch eager / `torch.compile`
+* Stage 4 on a real accelerator with vLLM (fp8/AWQ) to compare with the CPU llama.cpp quantisations; fused
+  RMSNorm kernel in OpenAI Triton vs. PyTorch eager / `torch.compile`
 
 ## References
 
