@@ -1,0 +1,19 @@
+{
+  "model": "lora-r4-bf16",
+  "adapter": null,
+  "label": "lora-r4-bf16",
+  "backend": "OpenAICompatBackend",
+  "max_new_tokens": 256,
+  "max_steps": 6,
+  "n_tasks": 150,
+  "system_prompt_override": false,
+  "tools_override": null,
+  "started": "2026-10-06T18:08:06.043816+00:00",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "python": "3.12.10",
+  "tasks_file": "data/tasks/test.jsonl",
+  "limit": 150,
+  "categories": null,
+  "finished": "2026-10-06T18:12:39.899874+00:00",
+  "elapsed_s": 273.8
+}
