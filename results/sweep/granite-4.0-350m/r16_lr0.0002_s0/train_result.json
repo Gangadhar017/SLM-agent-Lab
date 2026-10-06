@@ -1,0 +1,118 @@
+{
+  "result": {
+    "model_id": "ibm-granite/granite-4.0-350m",
+    "data_path": "data/sft/oracle_train.jsonl",
+    "out_dir": "results/sweep/granite-4.0-350m/r16_lr0.0002_s0",
+    "rank": 16,
+    "alpha_ratio": 2.0,
+    "lr": 0.0002,
+    "seed": 0,
+    "epochs": 2.0,
+    "batch_size": 1,
+    "grad_accum": 4,
+    "max_len": 1024,
+    "dropout": 0.05,
+    "target_modules": "q_proj,k_proj,v_proj,o_proj",
+    "warmup_ratio": 0.05,
+    "max_examples": null,
+    "eval_fraction": 0.1,
+    "dtype": "float32",
+    "log_every": 10,
+    "n_train": 261,
+    "n_eval": 29,
+    "total_steps": 132,
+    "trainable_params": 2981888,
+    "total_params": 355361792,
+    "trainable_pct": 0.8391,
+    "eval_loss_before": 3.0338,
+    "eval_loss_after": 0.0521,
+    "final_train_loss": 0.0007,
+    "train_time_s": 1942.4
+  },
+  "log": [
+    {
+      "step": 10,
+      "train_loss": 0.3563,
+      "lr": 0.00019365079365079365,
+      "elapsed_s": 199.1
+    },
+    {
+      "step": 20,
+      "train_loss": 0.1839,
+      "lr": 0.00017777777777777779,
+      "elapsed_s": 372.4
+    },
+    {
+      "step": 30,
+      "train_loss": 0.1433,
+      "lr": 0.00016190476190476192,
+      "elapsed_s": 508.2
+    },
+    {
+      "step": 40,
+      "train_loss": 0.0295,
+      "lr": 0.00014603174603174603,
+      "elapsed_s": 643.2
+    },
+    {
+      "step": 50,
+      "train_loss": 0.057,
+      "lr": 0.00013015873015873017,
+      "elapsed_s": 776.7
+    },
+    {
+      "step": 60,
+      "train_loss": 0.0216,
+      "lr": 0.00011428571428571428,
+      "elapsed_s": 927.0
+    },
+    {
+      "step": 70,
+      "train_loss": 0.0045,
+      "lr": 9.841269841269841e-05,
+      "elapsed_s": 1054.1
+    },
+    {
+      "step": 80,
+      "train_loss": 0.0656,
+      "lr": 8.253968253968255e-05,
+      "elapsed_s": 1169.0
+    },
+    {
+      "step": 90,
+      "train_loss": 0.0926,
+      "lr": 6.666666666666667e-05,
+      "elapsed_s": 1297.2
+    },
+    {
+      "step": 100,
+      "train_loss": 0.0436,
+      "lr": 5.0793650793650794e-05,
+      "elapsed_s": 1419.5
+    },
+    {
+      "step": 110,
+      "train_loss": 0.0203,
+      "lr": 3.492063492063492e-05,
+      "elapsed_s": 1575.1
+    },
+    {
+      "step": 120,
+      "train_loss": 0.0521,
+      "lr": 1.9047619047619046e-05,
+      "elapsed_s": 1761.1
+    },
+    {
+      "step": 130,
+      "train_loss": 0.0126,
+      "lr": 3.1746031746031746e-06,
+      "elapsed_s": 1901.9
+    },
+    {
+      "step": 132,
+      "train_loss": 0.0007,
+      "lr": 0.0,
+      "elapsed_s": 1915.1
+    }
+  ]
+}
