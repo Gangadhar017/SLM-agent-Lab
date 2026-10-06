@@ -1,0 +1,17 @@
+{
+  "model": "ibm-granite/granite-4.0-1b",
+  "adapter": null,
+  "label": "granite-4.0-1b",
+  "backend": "HFBackend",
+  "max_new_tokens": 160,
+  "max_steps": 6,
+  "n_tasks": 50,
+  "system_prompt_override": false,
+  "tools_override": null,
+  "started": "2026-10-06T14:57:52.442826+00:00",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "python": "3.12.10",
+  "tasks_file": "data/tasks/test.jsonl",
+  "limit": 150,
+  "categories": "doc_single,sql_single"
+}
