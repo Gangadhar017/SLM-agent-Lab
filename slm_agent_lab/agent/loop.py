@@ -39,6 +39,7 @@ class Step:
     latency_s: float = 0.0
     stop_reason: str = "eos"
     text_after_calls: str = ""
+    n_calls_dropped: int = 0  # calls emitted beyond max_calls_per_step (parsed but not executed)
 
 
 @dataclass
@@ -100,6 +101,7 @@ def run_task(backend, task: Task, max_steps: int = 6, max_calls_per_step: int = 
 
             if parsed.calls:
                 calls = parsed.calls[:max_calls_per_step]
+                step.n_calls_dropped = len(parsed.calls) - len(calls)
                 loop_hit = False
                 results = []
                 for c in calls:
