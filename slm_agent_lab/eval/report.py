@@ -11,6 +11,23 @@ from .taxonomy import FAILURE_LABELS, LABEL_GROUP
 
 CATEGORY_ORDER = ["calc_single", "convert_single", "sql_single", "doc_single", "multi_step", "no_tool", "unanswerable"]
 
+# fixed, group-coherent palette: green = success, reds = syntax, blues = planning, purples = reasoning
+LABEL_COLORS = {
+    "success": "#1b7837",
+    "malformed_tool_call": "#67001f",
+    "hallucinated_tool": "#b2182b",
+    "invalid_arguments": "#ef8a62",
+    "no_final_answer": "#fddbc7",
+    "no_tool_call": "#2166ac",
+    "wrong_tool": "#4393c3",
+    "incomplete_chain": "#92c5de",
+    "unnecessary_tool_then_wrong": "#d1e5f0",
+    "semantically_wrong_call": "#762a83",
+    "wrong_answer_after_correct_tools": "#9970ab",
+    "knowledge_error": "#c2a5cf",
+    "fabricated_answer": "#e7d4e8",
+}
+
 
 def load_runs(run_dirs: list[str | Path]) -> pd.DataFrame:
     rows = []
@@ -166,10 +183,11 @@ def make_figures(summary: dict, df: pd.DataFrame, fig_dir: Path) -> list[Path]:
     labels = [l for l in FAILURE_LABELS if l in set(df["label"])]
     fig, ax = plt.subplots(figsize=(9, 4.5))
     bottom = np.zeros(len(models))
-    cmap = plt.get_cmap("tab20")
-    for j, l in enumerate(labels):
+    for l in labels:
         vals = np.array([summary["models"][m]["failure_labels"].get(l, 0) / summary["models"][m]["n"] for m in models])
-        ax.bar(models, vals, bottom=bottom, label=l, color=("#2ca02c" if l == "success" else cmap(j % 20)))
+        name = l if l == "success" else f"{LABEL_GROUP.get(l, 'other')}: {l}"
+        ax.bar(models, vals, bottom=bottom, label=name, color=LABEL_COLORS.get(l, "#999999"), edgecolor="white",
+               linewidth=0.5)
         bottom += vals
     ax.set_ylabel("share of tasks")
     ax.set_title("Where each model fails (failure taxonomy)")
