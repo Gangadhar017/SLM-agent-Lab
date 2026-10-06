@@ -1,0 +1,20 @@
+{
+  "model": "ibm-granite/granite-4.0-350m",
+  "adapter": null,
+  "label": "granite-4.0-350m",
+  "backend": "HFBackend",
+  "max_new_tokens": 256,
+  "max_steps": 6,
+  "n_tasks": 20,
+  "system_prompt_override": false,
+  "tools_override": null,
+  "started": "2026-10-06T14:25:52.389952+00:00",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "python": "3.12.10",
+  "variant": "baseline",
+  "category": "doc_single",
+  "limit": 150,
+  "seed": 0,
+  "finished": "2026-10-06T14:32:17.101904+00:00",
+  "elapsed_s": 384.7
+}

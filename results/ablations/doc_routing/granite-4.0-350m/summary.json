@@ -1,0 +1,64 @@
+[
+  {
+    "variant": "baseline",
+    "n": 20,
+    "accuracy": 0.0,
+    "doc_search_used": 0.0,
+    "doc_search_first_call": 0.0,
+    "tool_error_rate": 0.632,
+    "failure_labels": {
+      "wrong_tool": 19,
+      "malformed_tool_call": 1
+    }
+  },
+  {
+    "variant": "doc_tool_first",
+    "n": 20,
+    "accuracy": 0.05,
+    "doc_search_used": 0.0,
+    "doc_search_first_call": 0.0,
+    "tool_error_rate": 0.632,
+    "failure_labels": {
+      "wrong_tool": 18,
+      "malformed_tool_call": 1
+    }
+  },
+  {
+    "variant": "cue_prefix",
+    "n": 20,
+    "accuracy": 0.75,
+    "doc_search_used": 0.95,
+    "doc_search_first_call": 0.95,
+    "tool_error_rate": 0.0,
+    "failure_labels": {
+      "wrong_answer_after_correct_tools": 3,
+      "wrong_tool": 1,
+      "semantically_wrong_call": 1
+    }
+  },
+  {
+    "variant": "sql_removed",
+    "n": 20,
+    "accuracy": 0.5,
+    "doc_search_used": 0.5,
+    "doc_search_first_call": 0.5,
+    "tool_error_rate": 0.053,
+    "failure_labels": {
+      "wrong_tool": 9,
+      "malformed_tool_call": 1
+    }
+  },
+  {
+    "variant": "doc_tool_only",
+    "n": 20,
+    "accuracy": 0.75,
+    "doc_search_used": 0.9,
+    "doc_search_first_call": 0.9,
+    "tool_error_rate": 0.0,
+    "failure_labels": {
+      "semantically_wrong_call": 2,
+      "no_tool_call": 2,
+      "wrong_answer_after_correct_tools": 1
+    }
+  }
+]
