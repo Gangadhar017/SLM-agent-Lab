@@ -174,7 +174,7 @@ def train_lora(cfg: TrainConfig, progress: bool = True) -> dict:
                 batch = _collate([train_tok[k] for k in chunk[j:j + cfg.batch_size]], tokenizer.pad_token_id)
                 out = model(**{k: v.to(device) for k, v in batch.items()})
                 (out.loss / cfg.grad_accum).backward()
-                loss_acc += float(out.loss) / cfg.grad_accum
+                loss_acc += float(out.loss.detach()) / cfg.grad_accum
             torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
             opt.step()
             sched.step()

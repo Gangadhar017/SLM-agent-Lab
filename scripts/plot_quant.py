@@ -7,6 +7,7 @@ when serve/bench.py has run, throughput.
 
 import argparse
 import csv
+import os
 from pathlib import Path
 
 import _bootstrap  # noqa: F401
@@ -22,8 +23,12 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--tag", action="append", default=None, help="tag prefix(es), e.g. base, lora-r16")
     ap.add_argument("--out", default=str(FIGURES_DIR / "quantization_accuracy.png"))
+    ap.add_argument("--models-dir", default=os.environ.get("SLM_MODELS_DIR") or
+                    str(Path(os.environ.get("LOCALAPPDATA", str(ROOT))) / "slm-agent-lab" / "models"),
+                    help="where the GGUF files live (for file sizes); falls back to <repo>/models")
     args = ap.parse_args()
     tags = args.tag or ["base"]
+    models_dirs = [Path(args.models_dir), ROOT / "models"]
 
     bench = {}
     bench_csv = RESULTS_DIR / "serve" / "bench.csv"
@@ -41,9 +46,9 @@ def main() -> None:
             if not (run / "trajectories.jsonl").exists():
                 continue
             s = next(iter(summarize(load_runs([run]))["models"].values()))
-            gguf = ROOT / "models" / f"{label}.gguf"
+            gguf = next((d / f"{label}.gguf" for d in models_dirs if (d / f"{label}.gguf").exists()), None)
             rows.append({"tag": tag, "precision": p, "label": label, "summary": s,
-                         "size_mb": round(gguf.stat().st_size / 1e6) if gguf.exists() else None,
+                         "size_mb": round(gguf.stat().st_size / 1e6) if gguf else None,
                          "tok_s": bench.get(label)})
     if not rows:
         raise SystemExit("no served-harness runs found under results/serve/")

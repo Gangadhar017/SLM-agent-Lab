@@ -8,7 +8,8 @@ tool-calling model* — does JSON formatting break before reasoning does?
 ## What was actually run: the CPU path (llama.cpp)
 
 `cpu_quant_study.ps1` converts a Hugging Face checkpoint to GGUF (`convert_hf_to_gguf.py` from the llama.cpp
-repo), quantises it with `llama-quantize` (Q8_0 = int8, Q4_K_M = int4), serves each file with `llama-server`
+repo; files go to `%LOCALAPPDATA%\slm-agent-lab\models` by default, outside the repo), quantises it with
+`llama-quantize` (Q8_0 = int8, Q4_K_M = int4), serves each file with `llama-server`
 (OpenAI-compatible `/v1/completions`), runs `scripts/run_eval.py --backend openai` through it and commits the
 trajectories under `results/serve/harness_<tag>-<precision>/`. `scripts/plot_quant.py` turns those runs into
 the table and figure in the main README. Result for Granite-4.0-350M: int8 is lossless; int4 drops accuracy from

@@ -15,6 +15,7 @@ param(
     [string]$Python = "C:\Users\om200\.venvs\slm-agent-lab\Scripts\python.exe",
     [string]$Precisions = "f16,q8_0,q4_k_m",
     [string]$ConvertType = "f16",   # GGUF type written by the converter; use q8_0 when an f16 file would not fit on disk
+    [string]$ModelsDir = (Join-Path $env:LOCALAPPDATA "slm-agent-lab\models"),  # outside the repo (and outside OneDrive)
     [int]$Limit = 150,
     [int]$Port = 8080,
     [int]$Threads = 4,
@@ -24,8 +25,9 @@ param(
 $ErrorActionPreference = "Continue"
 $repo = Split-Path -Parent $PSScriptRoot
 Set-Location $repo
-$models = Join-Path $repo "models"
+$models = $ModelsDir
 New-Item -ItemType Directory -Force $models | Out-Null
+Write-Output "GGUF files: $models"
 New-Item -ItemType Directory -Force (Join-Path $repo "results\logs") | Out-Null
 
 # locate llama.cpp binaries installed by winget
