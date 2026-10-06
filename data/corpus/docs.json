@@ -1,0 +1,262 @@
+{
+  "description": "Synthetic internal company documents. Every numeric fact used by the task set is listed under 'facts' so ground truth is exact.",
+  "documents": [
+    {
+      "id": "travel-policy",
+      "title": "Travel and Expense Policy",
+      "text": "Employees travelling on company business receive a meal per-diem of 45 USD per day for domestic trips and 80 USD per day for international trips. Hotel bookings must not exceed 150 USD per night without written approval from a director. Taxi receipts above 25 USD require an itemised receipt. Expense reports must be submitted within 30 days of the trip end date.",
+      "facts": [
+        {"key": "meal_perdiem_domestic", "q": "According to the travel policy, what is the daily meal per-diem for domestic trips in USD?", "value": 45, "unit": "USD"},
+        {"key": "meal_perdiem_international", "q": "What is the daily meal per-diem for international trips according to the travel policy?", "value": 80, "unit": "USD"},
+        {"key": "hotel_cap", "q": "What is the maximum hotel rate per night allowed by the travel policy without director approval?", "value": 150, "unit": "USD"},
+        {"key": "expense_deadline_days", "q": "Within how many days of a trip must expense reports be submitted?", "value": 30, "unit": "days"}
+      ]
+    },
+    {
+      "id": "remote-work-policy",
+      "title": "Remote Work Policy",
+      "text": "Employees may work remotely up to 3 days per week. Remote workers receive a one-time home office stipend of 400 USD and a monthly internet allowance of 30 USD. Core collaboration hours are 11:00 to 15:00 IST, during which remote employees must be reachable.",
+      "facts": [
+        {"key": "remote_days_per_week", "q": "How many days per week may employees work remotely?", "value": 3, "unit": "days"},
+        {"key": "home_office_stipend", "q": "What is the one-time home office stipend for remote workers in USD?", "value": 400, "unit": "USD"},
+        {"key": "internet_allowance", "q": "What is the monthly internet allowance for remote workers in USD?", "value": 30, "unit": "USD"}
+      ]
+    },
+    {
+      "id": "leave-policy",
+      "title": "Leave Policy",
+      "text": "Full-time employees accrue 22 days of paid annual leave per year, plus 10 days of sick leave. Up to 5 unused annual leave days may be carried over to the next calendar year. Parental leave is 26 weeks for primary caregivers and 4 weeks for secondary caregivers.",
+      "facts": [
+        {"key": "annual_leave_days", "q": "How many days of paid annual leave do full-time employees accrue per year?", "value": 22, "unit": "days"},
+        {"key": "sick_leave_days", "q": "How many days of sick leave do employees get per year?", "value": 10, "unit": "days"},
+        {"key": "carry_over_days", "q": "How many unused annual leave days can be carried over to the next year?", "value": 5, "unit": "days"},
+        {"key": "parental_leave_weeks", "q": "How many weeks of parental leave do primary caregivers receive?", "value": 26, "unit": "weeks"}
+      ]
+    },
+    {
+      "id": "laptop-pro-14-spec",
+      "title": "Laptop Pro 14 Specification",
+      "text": "The Laptop Pro 14 has a 14-inch display, weighs 3.1 pounds, and ships with 16 GB of memory and a 512 GB SSD. Its battery is rated at 70 watt-hours and lasts up to 12 hours of mixed use. The included charger supplies 65 watts.",
+      "facts": [
+        {"key": "laptop_pro_weight_lb", "q": "What is the weight of the Laptop Pro 14 in pounds?", "value": 3.1, "unit": "lb"},
+        {"key": "laptop_pro_battery_wh", "q": "What is the battery capacity of the Laptop Pro 14 in watt-hours?", "value": 70, "unit": "Wh"},
+        {"key": "laptop_pro_battery_hours", "q": "How many hours of battery life does the Laptop Pro 14 offer?", "value": 12, "unit": "hours"},
+        {"key": "laptop_pro_charger_w", "q": "How many watts does the Laptop Pro 14 charger supply?", "value": 65, "unit": "W"}
+      ]
+    },
+    {
+      "id": "monitor-27-spec",
+      "title": "Monitor 27 Specification",
+      "text": "The Monitor 27 is a 27-inch 4K display weighing 12.6 pounds including its stand. It refreshes at 144 Hz, reaches a peak brightness of 600 nits, and draws 38 watts in typical use.",
+      "facts": [
+        {"key": "monitor27_weight_lb", "q": "What is the weight of the Monitor 27 in pounds?", "value": 12.6, "unit": "lb"},
+        {"key": "monitor27_refresh_hz", "q": "What is the refresh rate of the Monitor 27 in Hz?", "value": 144, "unit": "Hz"},
+        {"key": "monitor27_brightness_nits", "q": "What is the peak brightness of the Monitor 27 in nits?", "value": 600, "unit": "nits"},
+        {"key": "monitor27_power_w", "q": "How many watts does the Monitor 27 draw in typical use?", "value": 38, "unit": "W"}
+      ]
+    },
+    {
+      "id": "dock-x-spec",
+      "title": "Dock X Specification",
+      "text": "Dock X provides 2 HDMI ports and 4 USB-C ports and delivers 100 watts of power to a connected laptop. It weighs 1.2 kilograms and supports up to 3 external displays.",
+      "facts": [
+        {"key": "dockx_power_w", "q": "How many watts of power does Dock X deliver to a connected laptop?", "value": 100, "unit": "W"},
+        {"key": "dockx_weight_kg", "q": "What is the weight of Dock X in kilograms?", "value": 1.2, "unit": "kg"},
+        {"key": "dockx_displays", "q": "How many external displays does Dock X support?", "value": 3, "unit": "displays"},
+        {"key": "dockx_usbc_ports", "q": "How many USB-C ports does Dock X have?", "value": 4, "unit": "ports"}
+      ]
+    },
+    {
+      "id": "warehouse-logistics",
+      "title": "Warehouse Logistics Overview",
+      "text": "The central warehouse in Pune is 148 kilometres from the Mumbai port. A standard delivery truck carries 24 pallets and completes the round trip in about 7 hours. The warehouse operates 6 days a week and has a storage capacity of 5,000 pallets.",
+      "facts": [
+        {"key": "warehouse_port_km", "q": "How far is the central warehouse in Pune from the Mumbai port in kilometres?", "value": 148, "unit": "km"},
+        {"key": "pallets_per_truck", "q": "How many pallets does a standard delivery truck carry?", "value": 24, "unit": "pallets"},
+        {"key": "round_trip_hours", "q": "How many hours does a truck take for the round trip between the warehouse and the port?", "value": 7, "unit": "hours"},
+        {"key": "warehouse_capacity_pallets", "q": "What is the storage capacity of the central warehouse in pallets?", "value": 5000, "unit": "pallets"}
+      ]
+    },
+    {
+      "id": "office-locations",
+      "title": "Office Locations",
+      "text": "The Bangalore office spans 42,000 square feet across 4 floors and seats 380 people. The Gurgaon office is 18,500 square feet and seats 160 people. Both offices open at 8:00 and close at 21:00 on weekdays.",
+      "facts": [
+        {"key": "bangalore_sqft", "q": "How many square feet is the Bangalore office?", "value": 42000, "unit": "sq ft"},
+        {"key": "bangalore_seats", "q": "How many people does the Bangalore office seat?", "value": 380, "unit": "people"},
+        {"key": "gurgaon_seats", "q": "How many people does the Gurgaon office seat?", "value": 160, "unit": "people"},
+        {"key": "gurgaon_sqft", "q": "How many square feet is the Gurgaon office?", "value": 18500, "unit": "sq ft"}
+      ]
+    },
+    {
+      "id": "security-policy",
+      "title": "IT Security Policy",
+      "text": "Passwords must be at least 14 characters long and rotated every 90 days. Laptops lock automatically after 10 minutes of inactivity. Lost or stolen devices must be reported to IT within 24 hours. VPN sessions expire after 12 hours.",
+      "facts": [
+        {"key": "password_min_chars", "q": "What is the minimum password length in characters according to the IT security policy?", "value": 14, "unit": "characters"},
+        {"key": "password_rotation_days", "q": "How often, in days, must passwords be rotated?", "value": 90, "unit": "days"},
+        {"key": "laptop_lock_minutes", "q": "After how many minutes of inactivity do laptops lock automatically?", "value": 10, "unit": "minutes"},
+        {"key": "lost_device_report_hours", "q": "Within how many hours must a lost device be reported to IT?", "value": 24, "unit": "hours"}
+      ]
+    },
+    {
+      "id": "support-sla",
+      "title": "Customer Support SLA",
+      "text": "Priority 1 incidents must be acknowledged within 15 minutes and resolved within 4 hours. Priority 2 incidents are acknowledged within 1 hour and resolved within 24 hours. The support team targets a monthly customer satisfaction score of 92 percent.",
+      "facts": [
+        {"key": "p1_ack_minutes", "q": "Within how many minutes must a Priority 1 incident be acknowledged?", "value": 15, "unit": "minutes"},
+        {"key": "p1_resolve_hours", "q": "Within how many hours must a Priority 1 incident be resolved?", "value": 4, "unit": "hours"},
+        {"key": "p2_resolve_hours", "q": "Within how many hours must a Priority 2 incident be resolved?", "value": 24, "unit": "hours"},
+        {"key": "csat_target_pct", "q": "What monthly customer satisfaction score, in percent, does the support team target?", "value": 92, "unit": "percent"}
+      ]
+    },
+    {
+      "id": "onboarding-guide",
+      "title": "New Hire Onboarding Guide",
+      "text": "New hires complete onboarding within their first 10 working days. Each new hire is paired with a buddy for 8 weeks and must finish 6 mandatory training modules. Laptops are issued on day 1 and building access badges on day 2.",
+      "facts": [
+        {"key": "onboarding_days", "q": "Within how many working days do new hires complete onboarding?", "value": 10, "unit": "days"},
+        {"key": "buddy_weeks", "q": "For how many weeks is a new hire paired with a buddy?", "value": 8, "unit": "weeks"},
+        {"key": "training_modules", "q": "How many mandatory training modules must a new hire finish?", "value": 6, "unit": "modules"}
+      ]
+    },
+    {
+      "id": "data-retention-policy",
+      "title": "Data Retention Policy",
+      "text": "Customer transaction records are retained for 7 years. Application logs are kept for 90 days and database backups for 35 days. Deleted user accounts are purged permanently after 30 days.",
+      "facts": [
+        {"key": "transaction_retention_years", "q": "For how many years are customer transaction records retained?", "value": 7, "unit": "years"},
+        {"key": "log_retention_days", "q": "For how many days are application logs kept?", "value": 90, "unit": "days"},
+        {"key": "backup_retention_days", "q": "For how many days are database backups kept?", "value": 35, "unit": "days"}
+      ]
+    },
+    {
+      "id": "sales-commission-plan",
+      "title": "Sales Commission Plan",
+      "text": "Sales representatives earn a base commission of 5 percent on all closed deals. Deals above 50,000 USD earn an additional 2 percent on the full deal value. The quarterly quota for each representative is 300,000 USD.",
+      "facts": [
+        {"key": "base_commission_pct", "q": "What is the base commission percentage for sales representatives?", "value": 5, "unit": "percent"},
+        {"key": "bonus_commission_pct", "q": "What additional commission percentage applies to deals above 50,000 USD?", "value": 2, "unit": "percent"},
+        {"key": "quarterly_quota", "q": "What is the quarterly sales quota per representative in USD?", "value": 300000, "unit": "USD"},
+        {"key": "bonus_threshold", "q": "Above what deal value in USD does the additional commission apply?", "value": 50000, "unit": "USD"}
+      ]
+    },
+    {
+      "id": "keyboard-k2-spec",
+      "title": "Keyboard K2 Specification",
+      "text": "The Keyboard K2 is a wireless mechanical keyboard weighing 1.8 pounds. Its 4,000 mAh battery lasts about 240 hours on a single charge, and it can pair with up to 3 devices over Bluetooth.",
+      "facts": [
+        {"key": "k2_weight_lb", "q": "What is the weight of the Keyboard K2 in pounds?", "value": 1.8, "unit": "lb"},
+        {"key": "k2_battery_mah", "q": "What is the battery capacity of the Keyboard K2 in mAh?", "value": 4000, "unit": "mAh"},
+        {"key": "k2_battery_hours", "q": "How many hours does the Keyboard K2 battery last on a single charge?", "value": 240, "unit": "hours"}
+      ]
+    },
+    {
+      "id": "cloud-cost-report-q1",
+      "title": "Q1 Cloud Cost Report",
+      "text": "In Q1 the company spent 184,000 USD on cloud infrastructure, of which 61 percent was compute, 24 percent storage and 15 percent networking. Spending is forecast to grow 8 percent in Q2.",
+      "facts": [
+        {"key": "cloud_spend_q1", "q": "How much did the company spend on cloud infrastructure in Q1 in USD?", "value": 184000, "unit": "USD"},
+        {"key": "cloud_compute_pct", "q": "What percentage of Q1 cloud spending was compute?", "value": 61, "unit": "percent"},
+        {"key": "cloud_storage_pct", "q": "What percentage of Q1 cloud spending was storage?", "value": 24, "unit": "percent"},
+        {"key": "cloud_growth_pct", "q": "By what percentage is cloud spending forecast to grow in Q2?", "value": 8, "unit": "percent"}
+      ]
+    },
+    {
+      "id": "ev-fleet-program",
+      "title": "Electric Vehicle Fleet Program",
+      "text": "The company fleet includes 12 electric vans, each with a 75 kilowatt-hour battery and a range of 260 kilometres. Charging a van from empty takes 6 hours on a depot charger. The fleet travels roughly 1,800 kilometres per week in total.",
+      "facts": [
+        {"key": "ev_vans", "q": "How many electric vans are in the company fleet?", "value": 12, "unit": "vans"},
+        {"key": "ev_battery_kwh", "q": "What is the battery capacity of each electric van in kilowatt-hours?", "value": 75, "unit": "kWh"},
+        {"key": "ev_range_km", "q": "What is the range of each electric van in kilometres?", "value": 260, "unit": "km"},
+        {"key": "ev_charge_hours", "q": "How many hours does it take to charge an electric van from empty?", "value": 6, "unit": "hours"},
+        {"key": "ev_weekly_km", "q": "How many kilometres does the electric fleet travel per week in total?", "value": 1800, "unit": "km"}
+      ]
+    },
+    {
+      "id": "cafeteria-services",
+      "title": "Cafeteria Services",
+      "text": "The cafeteria serves lunch from 12:00 to 14:30 and charges 120 INR for a standard meal. Employees receive a meal subsidy of 60 INR per working day. The cafeteria seats 220 people.",
+      "facts": [
+        {"key": "meal_price_inr", "q": "What does a standard cafeteria meal cost in INR?", "value": 120, "unit": "INR"},
+        {"key": "meal_subsidy_inr", "q": "What is the daily cafeteria meal subsidy per employee in INR?", "value": 60, "unit": "INR"},
+        {"key": "cafeteria_seats", "q": "How many people does the cafeteria seat?", "value": 220, "unit": "people"}
+      ]
+    },
+    {
+      "id": "training-budget",
+      "title": "Learning and Training Budget",
+      "text": "Each employee has an annual learning budget of 1,200 USD. Conference travel may use at most 60 percent of that budget. Certification exam fees are reimbursed up to 300 USD per exam.",
+      "facts": [
+        {"key": "learning_budget", "q": "What is the annual learning budget per employee in USD?", "value": 1200, "unit": "USD"},
+        {"key": "conference_pct", "q": "What percentage of the learning budget may be used for conference travel?", "value": 60, "unit": "percent"},
+        {"key": "exam_reimbursement_cap", "q": "Up to how much, in USD, are certification exam fees reimbursed per exam?", "value": 300, "unit": "USD"}
+      ]
+    },
+    {
+      "id": "server-rack-spec",
+      "title": "Hyderabad Data Centre Rack Specification",
+      "text": "Each server rack in the Hyderabad data centre holds 42 rack units, draws up to 8 kilowatts, and weighs 1,100 pounds when fully loaded. The data centre has 36 racks and maintains an ambient temperature of 22 degrees Celsius.",
+      "facts": [
+        {"key": "rack_units", "q": "How many rack units does each server rack in the Hyderabad data centre hold?", "value": 42, "unit": "U"},
+        {"key": "rack_power_kw", "q": "How many kilowatts does a fully loaded server rack draw?", "value": 8, "unit": "kW"},
+        {"key": "rack_weight_lb", "q": "How much does a fully loaded server rack weigh in pounds?", "value": 1100, "unit": "lb"},
+        {"key": "rack_count", "q": "How many racks does the Hyderabad data centre have?", "value": 36, "unit": "racks"},
+        {"key": "dc_temp_c", "q": "What ambient temperature in degrees Celsius does the Hyderabad data centre maintain?", "value": 22, "unit": "C"}
+      ]
+    },
+    {
+      "id": "product-return-policy",
+      "title": "Product Return Policy",
+      "text": "Customers may return products within 30 days of delivery for a full refund. Returns between 31 and 60 days receive store credit minus a 15 percent restocking fee. Refunds are processed within 5 business days.",
+      "facts": [
+        {"key": "return_window_days", "q": "Within how many days of delivery can customers return a product for a full refund?", "value": 30, "unit": "days"},
+        {"key": "restocking_fee_pct", "q": "What restocking fee percentage applies to returns between 31 and 60 days?", "value": 15, "unit": "percent"},
+        {"key": "refund_days", "q": "Within how many business days are refunds processed?", "value": 5, "unit": "days"}
+      ]
+    },
+    {
+      "id": "headset-h1-spec",
+      "title": "Headset H1 Specification",
+      "text": "The Headset H1 weighs 9.5 ounces, offers 30 hours of battery life, and charges fully in 2 hours. Its noise-cancelling microphone has a pickup range of 1.5 metres.",
+      "facts": [
+        {"key": "h1_weight_oz", "q": "What is the weight of the Headset H1 in ounces?", "value": 9.5, "unit": "oz"},
+        {"key": "h1_battery_hours", "q": "How many hours of battery life does the Headset H1 offer?", "value": 30, "unit": "hours"},
+        {"key": "h1_charge_hours", "q": "How many hours does the Headset H1 take to charge fully?", "value": 2, "unit": "hours"}
+      ]
+    },
+    {
+      "id": "marketing-campaign-summer",
+      "title": "Summer Marketing Campaign Summary",
+      "text": "The summer campaign ran for 6 weeks with a budget of 95,000 USD and generated 12,400 leads. The conversion rate from lead to paying customer was 3.5 percent.",
+      "facts": [
+        {"key": "campaign_weeks", "q": "For how many weeks did the summer marketing campaign run?", "value": 6, "unit": "weeks"},
+        {"key": "campaign_budget", "q": "What was the budget of the summer marketing campaign in USD?", "value": 95000, "unit": "USD"},
+        {"key": "campaign_leads", "q": "How many leads did the summer marketing campaign generate?", "value": 12400, "unit": "leads"},
+        {"key": "campaign_conversion_pct", "q": "What was the lead-to-customer conversion rate of the summer campaign in percent?", "value": 3.5, "unit": "percent"}
+      ]
+    },
+    {
+      "id": "printer-p3-spec",
+      "title": "Printer P3 Specification",
+      "text": "The Printer P3 prints 32 pages per minute, holds 500 sheets in its main tray, and uses toner cartridges rated for 6,000 pages. It weighs 48 pounds.",
+      "facts": [
+        {"key": "p3_ppm", "q": "How many pages per minute does the Printer P3 print?", "value": 32, "unit": "pages/min"},
+        {"key": "p3_tray_sheets", "q": "How many sheets does the Printer P3 main tray hold?", "value": 500, "unit": "sheets"},
+        {"key": "p3_toner_pages", "q": "How many pages is a Printer P3 toner cartridge rated for?", "value": 6000, "unit": "pages"},
+        {"key": "p3_weight_lb", "q": "What is the weight of the Printer P3 in pounds?", "value": 48, "unit": "lb"}
+      ]
+    },
+    {
+      "id": "wellness-program",
+      "title": "Employee Wellness Program",
+      "text": "The wellness program reimburses gym memberships up to 50 USD per month and offers 4 free counselling sessions per year. Annual health check-ups are covered up to 200 USD.",
+      "facts": [
+        {"key": "gym_reimbursement", "q": "Up to how much per month, in USD, does the wellness program reimburse gym memberships?", "value": 50, "unit": "USD"},
+        {"key": "counselling_sessions", "q": "How many free counselling sessions per year does the wellness program offer?", "value": 4, "unit": "sessions"},
+        {"key": "health_checkup_cap", "q": "Up to how much, in USD, are annual health check-ups covered?", "value": 200, "unit": "USD"}
+      ]
+    }
+  ]
+}
