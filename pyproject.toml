@@ -1,0 +1,34 @@
+[project]
+name = "slm-agent-lab"
+version = "0.1.0"
+description = "Evaluation harness, failure taxonomy, LoRA distillation and serving study for small tool-calling language models"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+dependencies = [
+    "torch",
+    "transformers>=4.57",
+    "peft>=0.13",
+    "accelerate",
+    "numpy",
+    "pandas",
+    "matplotlib",
+    "tqdm",
+    "huggingface_hub",
+    "safetensors",
+]
+
+[project.optional-dependencies]
+dev = ["pytest"]
+serve = ["requests"]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["slm_agent_lab*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

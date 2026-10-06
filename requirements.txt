@@ -1,0 +1,13 @@
+# CPU-only PyTorch: pip install torch --index-url https://download.pytorch.org/whl/cpu
+torch
+transformers>=4.57
+peft>=0.13
+accelerate
+numpy
+pandas
+matplotlib
+tqdm
+huggingface_hub
+safetensors
+requests
+pytest
