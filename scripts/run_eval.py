@@ -35,6 +35,7 @@ def main() -> None:
     ap.add_argument("--dtype", default="float32")
     ap.add_argument("--threads", type=int, default=None, help="torch CPU threads")
     ap.add_argument("--out", default=None, help="run directory (default results/runs/<model-label>)")
+    ap.add_argument("--label", default=None, help="model label for logs/reports (default: derived from the backend)")
     ap.add_argument("--no-resume", action="store_true")
     ap.add_argument("--seed", type=int, default=0, help="seed for the stratified subset")
     args = ap.parse_args()
@@ -56,6 +57,8 @@ def main() -> None:
         backend = OpenAICompatBackend(args.base_url, args.model, tokenizer_id=args.tokenizer,
                                       max_new_tokens=args.max_new_tokens)
 
+    if args.label:
+        backend.label = args.label
     label = re.sub(r"[^A-Za-z0-9._+-]+", "_", backend.label)
     out_dir = Path(args.out) if args.out else RESULTS_DIR / "runs" / label
     print(f"model={backend.label}  tasks={len(tasks)}  out={out_dir}")
