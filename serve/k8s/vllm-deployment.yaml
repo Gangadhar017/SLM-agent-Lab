@@ -1,0 +1,85 @@
+# vLLM serving one of the evaluated models on Kubernetes, with Prometheus scraping vLLM's /metrics.
+# Switch precision by changing MODEL / QUANTIZATION / DTYPE (see serve/README.md for the sweep).
+#
+#   kubectl apply -f serve/k8s/vllm-deployment.yaml
+#   kubectl port-forward svc/vllm 8000:8000
+#   python serve/bench.py --model ibm-granite/granite-4.0-1b --tag fp16
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vllm
+  labels: { app: vllm }
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: vllm }
+  template:
+    metadata:
+      labels: { app: vllm }
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8000"
+        prometheus.io/path: "/metrics"
+    spec:
+      containers:
+        - name: vllm
+          image: vllm/vllm-openai:latest
+          env:
+            - { name: MODEL, value: "ibm-granite/granite-4.0-1b" }
+            - { name: DTYPE, value: "float16" }          # fp16 baseline
+            - { name: QUANTIZATION, value: "" }          # "" | fp8 | awq | gptq | bitsandbytes
+            - { name: MAX_MODEL_LEN, value: "4096" }
+            - { name: HF_HOME, value: "/models" }
+          command: ["/bin/sh", "-c"]
+          args:
+            - >
+              python3 -m vllm.entrypoints.openai.api_server
+              --model "$MODEL" --dtype "$DTYPE" --max-model-len "$MAX_MODEL_LEN"
+              --port 8000 --served-model-name "$MODEL"
+              ${QUANTIZATION:+--quantization $QUANTIZATION}
+          ports:
+            - { containerPort: 8000, name: http }
+          resources:
+            limits: { nvidia.com/gpu: 1 }
+          readinessProbe:
+            httpGet: { path: /health, port: 8000 }
+            initialDelaySeconds: 60
+            periodSeconds: 10
+          volumeMounts:
+            - { name: models, mountPath: /models }
+      volumes:
+        - name: models
+          persistentVolumeClaim: { claimName: vllm-models }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: vllm
+  labels: { app: vllm }
+spec:
+  selector: { app: vllm }
+  ports:
+    - { name: http, port: 8000, targetPort: 8000 }
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: vllm-models
+spec:
+  accessModes: [ReadWriteOnce]
+  resources:
+    requests: { storage: 30Gi }
+---
+# Requires the Prometheus Operator (kube-prometheus-stack). vLLM exposes vllm:* metrics on /metrics.
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: vllm
+  labels: { release: prometheus }
+spec:
+  selector:
+    matchLabels: { app: vllm }
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 5s
