@@ -23,7 +23,7 @@ need a GPU (free Kaggle/Colab T4 is enough for stage 2).
 
 | stage | state |
 |---|---|
-| 1. harness, task set, taxonomy, baselines | **done** — 17 unit tests, 300-task test split + 300-task train split, baseline runs for Granite 4.0 350M and Qwen2.5 0.5B logged in `results/runs/` |
+| 1. harness, task set, taxonomy, baselines | **done** — 24 unit tests, 300-task test split + 300-task train split, baseline runs for Granite 4.0 350M and Qwen2.5 0.5B logged in `results/runs/` |
 | 2. distillation data + LoRA sweep | **code done, pipeline smoke-tested on CPU**; full sweep = `notebooks/02_lora_sweep_kaggle.ipynb` (≈ 2 h on a T4) |
 | 3. LoRA paper reproduction | **analysis code done + smoke-tested**; numbers pending the stage-2 sweep → [REPRODUCTION.md](REPRODUCTION.md) |
 | 4. serving benchmark | **scripts + K8s manifests written, not executed** (no GPU on the dev machine) → [serve/README.md](serve/README.md) |
@@ -230,6 +230,7 @@ tests/          tools, parsing, scoring/taxonomy/generation (pytest)
 ## Quickstart
 
 ```bash
+git clone https://github.com/Gangadhar017/SLM-agent-Lab.git && cd SLM-agent-Lab
 python -m venv .venv && . .venv/bin/activate        # Windows: .venv\Scripts\activate
 pip install torch --index-url https://download.pytorch.org/whl/cpu   # or a CUDA build
 pip install -r requirements.txt
