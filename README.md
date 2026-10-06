@@ -258,6 +258,14 @@ endpoint via `OpenAICompatBackend` (identical prompt rendering and parsing as th
   format more or less robust to quantisation.
 * The local fp32 run and the served f16 run agree within two tasks on the same subset, which also validates the
   server path.
+* **Fine-tuned adapters are not float16-safe.** Serving a LoRA-merged model (stage 2) from an f16 GGUF, or
+  running it in PyTorch float16, produces degenerate text on every chat-formatted prompt ("is is both both…",
+  `!!!!!!!!`) while fp32 and bf16 are fine. The mechanism, measured with forward hooks: the *base* model's
+  layer-2 and layer-27 MLP outputs already reach 32 000–44 000 in fp32 (float16 max 65 504); the merged
+  adapter raises them by ~3 % and, in float16, layer 2's `shared_mlp.output_linear` is the first module to go
+  non-finite. The base model fits the f16 range by luck, not design. Practical rule from this: after
+  fine-tuning, re-validate the serving dtype — bf16 (same exponent range as fp32) is the safe default, and the
+  rank-sweep adapters below are therefore served from bf16, with int8/int4 quantised from it.
 
 Throughput/latency across concurrency (`serve/bench.py`) is measured on an idle machine and reported in
 `results/serve/bench.csv`. The GPU path — vLLM Deployment + Service + ServiceMonitor for Kubernetes, PromQL for
