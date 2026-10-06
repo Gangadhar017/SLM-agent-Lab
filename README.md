@@ -74,8 +74,10 @@ distillation on a T4, vLLM on Kubernetes) are written and documented but not exe
    answers them with `sql_query` (13/20, inventing tables such as `wellness_sessions`) or an invented
    calculator expression; Qwen narrates a tool it never calls. Granite *does* call `doc_search` — 15 times,
    7 of them in multi-step prompts that name a document ("Using the Laptop Pro 14 specification…") — so the
-   skill exists but is only triggered by a surface cue. This is the first thing stage-2 fine-tuning should fix,
-   and the train split contains exactly those trajectories.
+   skill exists but is only triggered by a surface cue. A zero for every model is the first sign of a harness
+   bug, so this was checked two ways (next subsection): the retrieval tool is fine, and a controlled ablation
+   reproduces, then removes, the failure. This is the first thing stage-2 fine-tuning should fix, and the train
+   split contains exactly those trajectories.
 3. **Qwen2.5-0.5B's dominant failure is not calling tools at all** (`no_tool_call`, 56/150): it does the
    arithmetic in its head (153 / 3.5 → "44.62") or describes a plan ("I will use unit_convert…") and stops. When
    it does call, 13 of 81 calls use a **hallucinated tool name** (`sqrt`, `div`, `mathematical_operation`,
@@ -97,6 +99,33 @@ distillation on a T4, vLLM on Kubernetes) are written and documented but not exe
    rather than hiding in either direction.
 9. **Cost.** Granite needed 61 completion tokens/task vs Qwen's 87 and ran 40 % faster per token (4.4 vs 3.1
    tok/s on this CPU) — the more accurate model is also the cheaper one, which is not a given.
+
+### Is the 0 % on document questions a bug? (harness check + ablation)
+
+*Oracle replay:* executing each task's gold `doc_search` call returns the right document as the top hit with the
+expected value in its text for **40/40** document tasks — and so does using the raw question as the query. The
+tool and corpus are not the problem; the models never call the tool.
+
+*Ablation* (`scripts/ablate_doc_routing.py`; Granite-4.0-350M, the subset's 20 document tasks, one change per
+variant, everything else identical):
+
+| variant | accuracy | `doc_search` called | dominant failure |
+|---|---|---|---|
+| baseline (main-run configuration) | 0 % | 0 % | `wrong_tool` 19 |
+| `doc_search` listed first among the tools | 5 % | 0 % | `wrong_tool` 18 |
+| `sql_query` removed from the tool list | 50 % | 50 % | `wrong_tool` 9 (→ calculator / unit_convert) |
+| question prefixed "According to the company documents, " | **75 %** | 95 % | `wrong_answer_after_correct_tools` 3 |
+| `doc_search` is the only tool | **75 %** | 90 % | `semantically_wrong_call` 2, `no_tool_call` 2 |
+
+Reading: tool *order* is irrelevant; the model can retrieve and read documents (75 % when it does); the failure
+is *routing*. Without a lexical cue, a plain policy question ("Within how many business days are refunds
+processed?") is sent to whichever tool looks most "company-like" — the database first, then the calculator or
+converter when the database is removed. The 25 % that remain wrong once retrieval happens are the familiar
+number-copying errors. Three practical consequences: (i) a small model's tool choice can be fixed by prompt
+phrasing alone, which is cheap but brittle; (ii) tool descriptions should say what the tool is *for* in the
+user's vocabulary, not only what it does; (iii) this is the single highest-value target for stage-2 training,
+since the train split contains hundreds of correctly-routed document trajectories. All five variants' logs are
+in `results/ablations/doc_routing/`.
 
 ## Stage 1 — the harness
 
