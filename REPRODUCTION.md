@@ -49,9 +49,12 @@ python scripts/subspace_analysis.py results/sweep/granite-4.0-350m/r8_lr0.0002_s
 ## Results
 
 **Status: pipeline verified end-to-end on CPU; the full sweep is a GPU job (notebook `02_lora_sweep_kaggle.ipynb`,
-≈ 2 h on a free T4).** The CPU smoke run (`results/sweep_smoke/`: r = 4 and 8, 40 examples, 2 optimiser
-steps) exists only to prove the training, masking, adapter saving and subspace code run; its numbers are not
-results and are not reported here.
+≈ 2 h on a free T4).** The CPU smoke run (`results/sweep_smoke/sweep.csv`: r = 4 and 8, 24 examples, 2 optimiser
+steps, ~25 s each) exists only to prove that training, assistant-only masking, adapter saving and the subspace
+code run: eval loss moved 3.45 → 2.50 (r=4) and 3.45 → 2.03 (r=8) after two steps, and
+`docs/figures/subspace_smoke_r4_vs_r8.png` shows φ ≈ the random-matrix baseline (top-1 φ = 0.0009 vs 0.0016
+random), which is exactly what two optimiser steps from a random LoRA-A initialisation should give. These are
+pipeline checks, not results, and are not reported in the tables below.
 
 Fill in after the sweep:
 
