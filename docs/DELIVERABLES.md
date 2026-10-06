@@ -42,9 +42,13 @@ application or interview. The README is for readers of the repo.
   the environment. The cost is realism, which is noted as a limitation.
 * *Why is `expected_tools` not part of the score?* There can be several valid tool paths (one SQL vs SQL +
   calculator). Correctness is answer-based; tool paths are diagnostic only.
-* *What did you find?* Quote the taxonomy breakdown from `results/report/summary.md` — e.g. which failure group
-  dominates for each model, and the `wrong_answer_after_correct_tools` share (the agent had the information and
-  still failed), which fine-tuning should attack first.
+* *What did you find?* Granite-4.0-350M 58 % vs Qwen2.5-0.5B 31 % on the same 150 tasks. Granite's tool-call
+  syntax is essentially perfect (0.7 % malformed) and its failures are planning failures: it never picks
+  `doc_search` for a plain policy question (0/20, routes to `sql_query`) unless the prompt names a document, and
+  it stops multi-step chains after the first tool. Qwen's dominant failure is answering from memory without any
+  tool call (56/150) and hallucinating tool names from the calculator description (`sqrt`, `div`). Both corrupt
+  numbers when copying them from observations (sign dropped, digits transposed). Full numbers: README "Key
+  findings" and `results/report/summary.md`.
 * *What would you do with more compute?* The full 54-run grid, 1B/1.5B students, DPO from the logged
   correct/incorrect pairs, int4 serving sweep, Triton kernel.
 
